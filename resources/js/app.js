@@ -4,6 +4,13 @@ import './bootstrap';
 // CUREVIA — Main JavaScript
 // ═══════════════════════════════════════════
 
+// ── Global utility (used by both initChatbot & initFullPageChat) ──
+function escapeHtml(text) {
+    const d = document.createElement('div');
+    d.textContent = text;
+    return d.innerHTML;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
 
     // — Star Field Generator —
@@ -441,7 +448,7 @@ function initChatbot() {
         })
         .catch(() => {
             typingEl.remove();
-            addMessage('assistant', 'Sorry, something went wrong. Please check your connection and try again.', true);
+            addMessage('assistant', 'Curevia AI is taking a little nap. Try again in a moment! 🌙', true);
             setStatus('online');
         })
         .finally(() => { isSending = false; });
@@ -635,7 +642,7 @@ function initFullPageChat() {
     // ── Conversation storage ──
     const STORAGE_KEY = 'curevia_chats';
     let conversations = loadConversations();
-    let activeConvId  = null;
+    let activeConvId  = loadActiveConvId();
 
     function loadConversations() {
         try {
@@ -646,6 +653,19 @@ function initFullPageChat() {
         try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(conversations));
         } catch { /* quota exceeded */ }
+    }
+
+    function loadActiveConvId() {
+        const id = localStorage.getItem(STORAGE_KEY + '_active');
+        if (id && conversations.some(c => c.id === id)) return id;
+        return conversations.length > 0 ? conversations[0].id : null;
+    }
+    function saveActiveConvId() {
+        if (activeConvId) {
+            localStorage.setItem(STORAGE_KEY + '_active', activeConvId);
+        } else {
+            localStorage.removeItem(STORAGE_KEY + '_active');
+        }
     }
 
     function createConversation() {
@@ -824,7 +844,10 @@ function initFullPageChat() {
         const chip = e.target.closest('.chat-suggestion-chip');
         if (chip) {
             const text = chip.textContent.trim();
-            if (text) sendMessage(text);
+            if (text) {
+                input.value = text;
+                triggerSend();
+            }
             return;
         }
     });
@@ -1028,6 +1051,7 @@ function initFullPageChat() {
         if (!activeConvId) {
             const conv = createConversation();
             activeConvId = conv.id;
+            saveActiveConvId();
         }
 
         const conv = getActiveConv();
@@ -1108,6 +1132,7 @@ function initFullPageChat() {
     // ── New chat ──
     function startNewChat() {
         activeConvId = null;
+        saveActiveConvId();
         renderMessages();
         renderSidebar();
         input.value = '';
@@ -1129,6 +1154,7 @@ function initFullPageChat() {
                 saveConversations();
                 if (activeConvId === delId) {
                     activeConvId = null;
+                    saveActiveConvId();
                     renderMessages();
                 }
                 renderSidebar();
@@ -1137,6 +1163,7 @@ function initFullPageChat() {
             const item = e.target.closest('.chat-conv-item');
             if (item) {
                 activeConvId = item.getAttribute('data-id');
+                saveActiveConvId();
                 renderMessages();
                 renderSidebar();
                 scrollToBottom();
@@ -1160,12 +1187,6 @@ function initFullPageChat() {
     // ── Utilities ──
     function scrollToBottom() {
         requestAnimationFrame(() => { msgArea.scrollTop = msgArea.scrollHeight; });
-    }
-
-    function escapeHtml(text) {
-        const d = document.createElement('div');
-        d.textContent = text;
-        return d.innerHTML;
     }
 
     function chatRenderMarkdown(text) {
