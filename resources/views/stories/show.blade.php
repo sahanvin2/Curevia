@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('title', $story->title . ' | Curevia Stories')
 @section('meta_description', $story->excerpt)
@@ -79,11 +79,53 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
             Bookmark
         </button>
-        <button class="btn-secondary" style="padding:0.6rem 1.25rem;font-size:0.8rem;" onclick="navigator.share?.({title:document.title,url:location.href}).catch(()=>{})">
+        <button class="btn-secondary" style="padding:0.6rem 1.25rem;font-size:0.8rem;display:flex;align-items:center;gap:0.5rem;" onclick="openShareModal(document.title, location.href, 'story')">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
             Share
         </button>
     </div>
+
+    {{-- Related Products --}}
+    @if(isset($relatedProducts) && $relatedProducts->count() > 0)
+    <div style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border-subtle);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;flex-wrap:wrap;gap:0.5rem;">
+            <div>
+                <h3 style="font-size:1.05rem;font-weight:800;color:var(--text-primary);margin:0;">Explore Related Products</h3>
+                <p style="font-size:0.78rem;color:var(--text-muted);margin:0.25rem 0 0;">Curated picks based on this topic</p>
+            </div>
+            <a href="{{ route('shop.index') }}" style="font-size:0.8rem;color:var(--accent-cyan);text-decoration:none;display:flex;align-items:center;gap:0.3rem;white-space:nowrap;">
+                Browse shop <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem;margin-top:1.25rem;">
+            @foreach($relatedProducts as $rp)
+            <a href="{{ route('shop.show', $rp->slug) }}" style="text-decoration:none;display:flex;flex-direction:column;overflow:hidden;border-radius:1rem;border:1px solid rgba(34,242,226,0.08);background:rgba(17,24,39,0.6);transition:all .25s;" onmouseover="this.style.borderColor='rgba(34,242,226,0.25)';this.style.transform='translateY(-3px)'" onmouseout="this.style.borderColor='rgba(34,242,226,0.08)';this.style.transform='none'">
+                <div style="position:relative;overflow:hidden;">
+                    <img src="{{ $rp->image }}" alt="{{ $rp->name }}" style="width:100%;height:130px;object-fit:cover;display:block;" loading="lazy">
+                    @if($rp->original_price && $rp->original_price > $rp->price)
+                    <span style="position:absolute;top:0.5rem;right:0.5rem;background:#EF4444;color:#fff;font-size:0.65rem;font-weight:800;padding:0.2rem 0.5rem;border-radius:0.4rem;">-{{ round((($rp->original_price - $rp->price) / $rp->original_price) * 100) }}%</span>
+                    @endif
+                </div>
+                <div style="padding:0.8rem;flex:1;display:flex;flex-direction:column;gap:0.35rem;">
+                    <span style="font-size:0.68rem;color:var(--accent-violet);font-weight:700;text-transform:uppercase;letter-spacing:0.07em;">{{ $rp->category }}</span>
+                    <h4 style="font-size:0.82rem;font-weight:700;color:var(--text-primary);line-height:1.3;margin:0;">{{ Str::limit($rp->name, 50) }}</h4>
+                    <div style="display:flex;align-items:center;gap:0.3rem;margin-top:auto;padding-top:0.35rem;">
+                        <span style="font-size:0.92rem;font-weight:800;color:var(--accent-cyan);">${{ number_format($rp->price, 2) }}</span>
+                        @if($rp->original_price && $rp->original_price > $rp->price)
+                        <span style="font-size:0.72rem;color:var(--text-muted);text-decoration:line-through;">${{ number_format($rp->original_price, 2) }}</span>
+                        @endif
+                    </div>
+                    <div style="display:flex;align-items:center;gap:0.25rem;">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="#F59E0B" stroke="#F59E0B" stroke-width="1"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <span style="font-size:0.72rem;color:var(--text-muted);">{{ $rp->rating }}</span>
+                    </div>
+                </div>
+            </a>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
 </article>
 
 @endsection

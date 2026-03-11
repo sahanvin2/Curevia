@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Story;
+use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
 
@@ -48,6 +49,42 @@ class StoryController extends Controller
             ->take(3)
             ->get();
 
-        return view('stories.show', compact('story', 'related'));
+        // Build keyword list from story title + category name for product matching
+        $stopwords = ['with','from','that','this','have','will','your','what','about','does',
+                      'into','been','more','than','when','they','their','there','creates',
+                      'create','which','where','some','also','other','after','brain','mind'];
+        $rawText = strtolower($story->title . ' ' . ($story->category->name ?? ''));
+        $keywords = collect(preg_split('/\W+/', $rawText))
+            ->filter(fn($w) => strlen($w) >= 4)
+            ->filter(fn($w) => !in_array($w, $stopwords))
+            ->unique()
+            ->values()
+            ->take(6);
+
+        $relatedProducts = collect();
+
+        if ($keywords->isNotEmpty()) {
+            $relatedProducts = Product::where('is_active', true)
+                ->where(function ($q) use ($keywords) {
+                    foreach ($keywords as $kw) {
+                        $q->orWhere('name', 'ilike', "%{$kw}%")
+                          ->orWhere('description', 'ilike', "%{$kw}%")
+                          ->orWhere('category', 'ilike', "%{$kw}%");
+                    }
+                })
+                ->orderByDesc('rating')
+                ->take(4)
+                ->get();
+        }
+
+        // Fallback: top-rated products if no keyword match
+        if ($relatedProducts->isEmpty()) {
+            $relatedProducts = Product::where('is_active', true)
+                ->orderByDesc('rating')
+                ->take(4)
+                ->get();
+        }
+
+        return view('stories.show', compact('story', 'related', 'relatedProducts'));
     }
 }

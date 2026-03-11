@@ -172,7 +172,7 @@
                 </div>
 
                 {{-- Trust badges row --}}
-                <div style="display:flex;gap:1.5rem;padding-top:1.5rem;margin-top:1.25rem;border-top:1px solid var(--border-subtle);flex-wrap:wrap;">
+                <div style="display:flex;gap:1.5rem;padding-top:1.5rem;margin-top:1.25rem;border-top:1px solid var(--border-subtle);flex-wrap:wrap;align-items:center;">
                     <div style="display:flex;align-items:center;gap:0.4rem;font-size:0.78rem;color:var(--text-muted);">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                         Verified Retailer
@@ -185,6 +185,11 @@
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="1.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
                         Easy Returns
                     </div>
+                    {{-- Share button --}}
+                    <button onclick="openShareModal(document.title, location.href, 'product')" style="display:flex;align-items:center;gap:0.4rem;background:rgba(34,242,226,0.05);border:1px solid rgba(34,242,226,0.15);border-radius:0.6rem;padding:0.4rem 0.85rem;font-size:0.78rem;font-weight:700;color:var(--accent-cyan);cursor:pointer;transition:all .2s;margin-left:auto;" onmouseover="this.style.background='rgba(34,242,226,0.12)'" onmouseout="this.style.background='rgba(34,242,226,0.05)'">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
+                        Share
+                    </button>
                 </div>
             </div>
         </div>

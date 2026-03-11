@@ -286,6 +286,8 @@
         </div>
     </footer>
 
+    @include('layouts._share_modal')
+
     @yield('extra_scripts')
 
     {{-- ═══════ CUREVIA AI CHATBOT ═══════ --}}
