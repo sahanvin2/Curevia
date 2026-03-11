@@ -6,6 +6,8 @@ use App\Models\Article;
 use App\Models\Story;
 use App\Models\Category;
 use App\Services\GeminiService;
+use App\Services\GroqService;
+use App\Services\DeepSeekService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -17,20 +19,26 @@ class ChatbotController extends Controller
         return view('chat');
     }
 
-    public function send(Request $request, GeminiService $gemini): JsonResponse
+    public function send(Request $request): JsonResponse
     {
         $request->validate([
             'message' => 'required|string|max:2000',
+            'model'   => 'nullable|string|in:gemini,groq,deepseek',
             'history' => 'nullable|array|max:20',
             'history.*.role'    => 'required_with:history|string|in:user,assistant',
             'history.*.content' => 'required_with:history|string|max:5000',
         ]);
 
+        $model   = $request->input('model', 'gemini');
+        $message = $request->input('message');
+        $history = $request->input('history', []);
+
         try {
-            $result = $gemini->askCurevia(
-                $request->input('message'),
-                $request->input('history', [])
-            );
+            $result = match ($model) {
+                'groq'     => app(GroqService::class)->askCurevia($message, $history),
+                'deepseek' => app(DeepSeekService::class)->askCurevia($message, $history),
+                default    => app(GeminiService::class)->askCurevia($message, $history),
+            };
 
             return response()->json([
                 'success'     => true,

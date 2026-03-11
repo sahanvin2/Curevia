@@ -430,7 +430,11 @@ function initChatbot() {
                 'Accept': 'application/json',
                 'X-CSRF-TOKEN': csrfToken || '',
             },
-            body: JSON.stringify({ message, history: history.slice(-20) }),
+            body: JSON.stringify({
+                message,
+                model: localStorage.getItem('curevia_selected_model') || 'groq',
+                history: history.slice(-20)
+            }),
         })
         .then(res => res.json())
         .then(data => {
@@ -652,6 +656,38 @@ function initFullPageChat() {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
     let isSending = false;
     let currentSuggestionsEl = null; // tracks the active suggestion chips row
+
+    // ── Model selection ──
+    const MODEL_KEY = 'curevia_selected_model';
+    let selectedModel = localStorage.getItem(MODEL_KEY) || 'gemini';
+
+    const modelBtns   = document.querySelectorAll('.chat-model-btn');
+    const modelLabel  = document.getElementById('chat-model-label');
+    const topbarTitle = document.getElementById('chat-topbar-title');
+
+    const MODEL_META = {
+        gemini:   { label: 'Gemini 2.5 Flash',    topbar: 'Gemini 2.5 Flash' },
+        groq:     { label: 'Groq · Llama 3.3 70B', topbar: 'Groq · Llama 3.3' },
+        deepseek: { label: 'DeepSeek Chat',         topbar: 'DeepSeek Chat' },
+    };
+
+    function applyModelUI(model) {
+        modelBtns.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.model === model);
+        });
+        if (modelLabel) modelLabel.textContent = MODEL_META[model]?.label || model;
+        if (topbarTitle) topbarTitle.textContent = MODEL_META[model]?.topbar || 'Curevia AI';
+    }
+
+    applyModelUI(selectedModel);
+
+    modelBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            selectedModel = btn.dataset.model;
+            localStorage.setItem(MODEL_KEY, selectedModel);
+            applyModelUI(selectedModel);
+        });
+    });
 
     // ── Conversation storage ──
     const STORAGE_KEY = 'curevia_chats';
@@ -1096,6 +1132,7 @@ function initFullPageChat() {
             },
             body: JSON.stringify({
                 message,
+                model: selectedModel,
                 history: conv.messages.filter(m => m.role === 'user' || m.role === 'assistant').slice(-20)
             }),
         })

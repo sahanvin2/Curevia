@@ -157,6 +157,33 @@
         {{-- Input --}}
         <div class="chat-input-wrapper">
             <div class="chat-input-container">
+
+                {{-- Model Selector --}}
+                <div class="chat-model-selector" role="group" aria-label="Select AI model">
+                    <button class="chat-model-btn active" data-model="gemini" title="Google Gemini 2.5 Flash">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 2L9.5 9.5 2 12l7.5 2.5L12 22l2.5-7.5L22 12l-7.5-2.5z" fill="currentColor" opacity="0.9"/>
+                        </svg>
+                        <span>Gemini</span>
+                        <span class="model-badge">2.5 Flash</span>
+                    </button>
+                    <button class="chat-model-btn" data-model="groq" title="Llama 3.3 70B via Groq — Ultra fast inference">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                            <polygon points="13,2 3,14 12,14 11,22 21,10 12,10" fill="currentColor"/>
+                        </svg>
+                        <span>Groq</span>
+                        <span class="model-badge">Llama 3.3</span>
+                    </button>
+                    <button class="chat-model-btn" data-model="deepseek" title="DeepSeek Chat">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="3" fill="currentColor"/>
+                            <path d="M12 2a10 10 0 0 1 7.07 17.07M4.93 4.93A10 10 0 0 0 12 22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none" opacity="0.7"/>
+                        </svg>
+                        <span>DeepSeek</span>
+                        <span class="model-badge">Chat</span>
+                    </button>
+                </div>
+
                 <div class="chat-input-box">
                     <textarea id="chat-input" class="chat-input-field" placeholder="Message Curevia AI..." rows="1" maxlength="2000" aria-label="Type your message"></textarea>
                     <button id="chat-send-btn" class="chat-send" aria-label="Send message" disabled>
@@ -165,7 +192,7 @@
                         </svg>
                     </button>
                 </div>
-                <p class="chat-disclaimer">Powered by Gemini · Curevia AI can make mistakes. Verify important information.</p>
+                <p id="chat-disclaimer" class="chat-disclaimer">Powered by <span id="chat-model-label">Gemini 2.5 Flash</span> · Curevia AI can make mistakes. Verify important information.</p>
             </div>
         </div>
     </main>

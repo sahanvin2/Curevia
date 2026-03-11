@@ -5,28 +5,27 @@ namespace App\Services;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-class DeepSeekService
+class GroqService
 {
     protected string $apiKey;
     protected string $baseUrl;
 
     public function __construct()
     {
-        $this->apiKey  = config('services.deepseek.api_key', '');
-        $this->baseUrl = rtrim(config('services.deepseek.base_uri', 'https://api.deepseek.com'), '/');
+        $this->apiKey  = config('services.groq.api_key', '');
+        $this->baseUrl = rtrim(config('services.groq.base_uri', 'https://api.groq.com/openai/v1'), '/');
     }
 
     /**
-     * Send a chat completion request to DeepSeek.
+     * Send a chat completion request to Groq (OpenAI-compatible).
      */
     public function chat(array $messages, array $params = []): array
     {
         $payload = array_merge([
-            'model'       => 'deepseek-chat',
+            'model'       => 'llama-3.3-70b-versatile',
             'messages'    => $messages,
             'temperature' => 0.4,
             'max_tokens'  => 2048,
-            'top_p'       => 0.9,
             'stream'      => false,
         ], $params);
 
@@ -41,17 +40,13 @@ class DeepSeekService
             $status = $response->status();
             $body   = $response->body();
 
-            Log::error('DeepSeek API Error', [
-                'status' => $status,
-                'body'   => $body,
-            ]);
+            Log::error('Groq API Error', ['status' => $status, 'body' => $body]);
 
             $msg = match (true) {
-                $status === 401 => 'Invalid API key. Please check your DeepSeek configuration.',
-                $status === 402 => 'DeepSeek API credits exhausted. Please top up your account at platform.deepseek.com.',
-                $status === 429 => 'Too many requests. Please wait a moment and try again.',
-                $status >= 500  => 'DeepSeek servers are temporarily unavailable. Please try again later.',
-                default         => 'DeepSeek API request failed (HTTP ' . $status . ').',
+                $status === 401 => 'Invalid Groq API key. Please check your configuration.',
+                $status === 429 => 'Groq API rate limit reached. Please wait a moment and try again.',
+                $status >= 500  => 'Groq servers are temporarily unavailable. Please try again later.',
+                default         => 'Groq API request failed (HTTP ' . $status . ').',
             };
 
             throw new \RuntimeException($msg);
@@ -67,7 +62,7 @@ class DeepSeekService
     public function askCurevia(string $question, array $history = []): array
     {
         $systemPrompt = <<<'PROMPT'
-You are **Curevia AI** — the intelligent assistant for Curevia, The Ocean of Knowledge, powered by DeepSeek.
+You are **Curevia AI** — the intelligent assistant for Curevia, The Ocean of Knowledge, powered by Llama 3.3.
 
 **ALLOWED TOPICS (answer ONLY these):**
 Science, physics, chemistry, biology, astronomy, space, planets, stars, galaxies, history, ancient civilizations, geography, countries, continents, animals, wildlife, marine life, the human body, medicine, health, mythology, folklore, nature, ecosystems, climate, weather, oceans, volcanoes, earthquakes, technology breakthroughs, inventions, discoveries, archaeology, paleontology, dinosaurs, evolution, philosophy of science, mathematics (conceptual), and general encyclopedic knowledge.
@@ -94,10 +89,8 @@ Science, physics, chemistry, biology, astronomy, space, planets, stars, galaxies
 Never generate harmful, hateful, or misleading content.
 PROMPT;
 
-        $messages   = [];
-        $messages[] = ['role' => 'system', 'content' => $systemPrompt];
+        $messages = [['role' => 'system', 'content' => $systemPrompt]];
 
-        // Append conversation history (keep last 10 exchanges max)
         $recent = array_slice($history, -20);
         foreach ($recent as $msg) {
             if (isset($msg['role'], $msg['content'])) {
@@ -117,7 +110,7 @@ PROMPT;
 
         $raw = $result['choices'][0]['message']['content'] ?? '';
 
-        // Strip markdown fencing if model wrapped the JSON
+        // Strip markdown fencing if the model wrapped the JSON
         $clean = trim($raw);
         if (preg_match('/^```(?:json)?\s*\n?(.+?)\n?\s*```$/s', $clean, $m)) {
             $clean = trim($m[1]);

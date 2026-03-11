@@ -45,4 +45,9 @@ return [
         'base_uri' => 'https://generativelanguage.googleapis.com',
     ],
 
+    'groq' => [
+        'api_key'  => env('GROQ_API_KEY'),
+        'base_uri' => 'https://api.groq.com/openai/v1',
+    ],
+
 ];
