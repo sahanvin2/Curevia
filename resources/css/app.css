@@ -145,9 +145,9 @@ body {
 }
 
 /* Hamburger — visible only on mobile */
-.hamburger-mobile { display: none; }
+.hamburger-mobile { display: none !important; }
 @media (max-width: 768px) {
-    .hamburger-mobile { display: flex; }
+    .hamburger-mobile { display: flex !important; }
 }
 
 /* Desktop-only elements */

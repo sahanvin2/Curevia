@@ -102,7 +102,7 @@ function initStarField() {
     const container = document.getElementById('stars-bg');
     if (!container) return;
 
-    const count = 180;
+    const count = 80;
     for (let i = 0; i < count; i++) {
         const star = document.createElement('div');
         star.className = 'star';

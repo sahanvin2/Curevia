@@ -16,9 +16,9 @@ class EncyclopediaController extends Controller
         if ($request->filled('q')) {
             $search = $request->input('q');
             $query->where(function ($q) use ($search) {
-                $q->where('title', 'ilike', "%{$search}%")
-                  ->orWhere('summary', 'ilike', "%{$search}%")
-                  ->orWhere('content', 'ilike', "%{$search}%");
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('summary', 'like', "%{$search}%")
+                  ->orWhere('content', 'like', "%{$search}%");
             });
         }
 
