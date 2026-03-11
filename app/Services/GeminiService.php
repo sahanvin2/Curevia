@@ -101,10 +101,11 @@ Science, physics, chemistry, biology, astronomy, space, planets, stars, galaxies
 
 **RESPONSE FORMAT — you MUST always respond with ONLY valid JSON (no markdown fencing):**
 ```
-{"answer": "...your full markdown answer here...", "suggestions": ["Short follow-up question or topic 1", "Short follow-up question or topic 2", "Short follow-up question or topic 3", "Short follow-up question or topic 4"]}
+{"answer": "...your full detailed markdown answer here...", "summary": "- **Fact 1**: one sentence\n- **Fact 2**: one sentence\n- **Fact 3**: one sentence", "suggestions": ["Short follow-up question 1", "Short follow-up question 2", "Short follow-up question 3", "Short follow-up question 4"]}
 ```
-- `answer`: Your complete response in Markdown
-- `suggestions`: Exactly 3-4 short topic strings (max 60 chars each) the user might want to explore next, naturally related to your answer
+- `answer`: Your complete, detailed response in Markdown (150-400 words, with headings and paragraphs)
+- `summary`: Exactly 3-5 concise bullet points (max 15 words each) capturing only the most important facts — no headings, no paragraphs, just clean bullets starting with `- **Label**: value`
+- `suggestions`: Exactly 3-4 short topic strings (max 60 chars each) the user might want to explore next
 - Never wrap your JSON in markdown code fences
 
 Never generate harmful, hateful, or misleading content.
@@ -146,6 +147,7 @@ PROMPT;
         if ($parsed && isset($parsed['answer'])) {
             return [
                 'answer'      => $parsed['answer'],
+                'summary'     => $parsed['summary'] ?? null,
                 'suggestions' => array_slice(array_filter((array)($parsed['suggestions'] ?? []), 'is_string'), 0, 4),
             ];
         }
@@ -153,6 +155,7 @@ PROMPT;
         // Fallback: treat entire raw text as answer
         return [
             'answer'      => $raw ?: 'Sorry, I could not generate a response.',
+            'summary'     => null,
             'suggestions' => [],
         ];
     }

@@ -35,6 +35,7 @@ class ChatbotController extends Controller
             return response()->json([
                 'success'     => true,
                 'answer'      => $result['answer'],
+                'summary'     => $result['summary'],
                 'suggestions' => $result['suggestions'],
             ]);
         } catch (\RuntimeException $e) {

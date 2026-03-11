@@ -334,6 +334,7 @@ function initChatbot() {
 
     let history = [];
     let isSending = false;
+    let lastUserQuestion = '';
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
     // — Toggle panel
@@ -358,6 +359,7 @@ function initChatbot() {
     if (clearBtn) {
         clearBtn.addEventListener('click', () => {
             history = [];
+            lastUserQuestion = '';
             msgArea.innerHTML = '';
             addBotWelcome();
             if (chips) chips.style.display = 'flex';
@@ -380,13 +382,13 @@ function initChatbot() {
     });
     sendBtn.addEventListener('click', () => { if (input.value.trim()) triggerSend(); });
 
-    // — Suggestion chips
+    // — Preset suggestion chips → redirect to full chat page
     if (chips) {
         chips.addEventListener('click', (e) => {
             const chip = e.target.closest('.chatbot-chip');
             if (!chip) return;
             const q = chip.getAttribute('data-q');
-            if (q) { input.value = q; triggerSend(); }
+            if (q) window.location.href = '/chat?q=' + encodeURIComponent(q);
         });
     }
 
@@ -396,6 +398,8 @@ function initChatbot() {
         const message = input.value.trim();
         if (!message) return;
 
+        lastUserQuestion = message;
+
         // Add user message to UI
         addMessage('user', message);
         history.push({ role: 'user', content: message });
@@ -403,8 +407,9 @@ function initChatbot() {
         input.style.height = 'auto';
         sendBtn.disabled = true;
 
-        // Hide chips after first message
+        // Hide preset chips, remove any previous AI chips
         if (chips) chips.style.display = 'none';
+        msgArea.querySelectorAll('.chatbot-ai-chips-row').forEach(el => el.remove());
 
         // Show typing indicator
         const typingEl = addTyping();
@@ -423,9 +428,15 @@ function initChatbot() {
         .then(res => res.json())
         .then(data => {
             typingEl.remove();
-            const answer = data.answer || 'Sorry, I could not get a response.';
-            addMessage('assistant', answer, true);
-            history.push({ role: 'assistant', content: answer });
+            // Mini chatbot shows summary (bullet points); full answer stored in history
+            const summary = data.summary || data.answer || 'Sorry, I could not get a response.';
+            const fullAnswer = data.answer || summary;
+            addMessage('assistant', summary, true, fullAnswer);
+            history.push({ role: 'assistant', content: fullAnswer });
+            // AI-generated suggestion chips → redirect to full chat
+            if (data.suggestions && data.suggestions.length > 0) {
+                addMiniSuggestions(data.suggestions);
+            }
             setStatus('online');
         })
         .catch(() => {
@@ -437,7 +448,7 @@ function initChatbot() {
     }
 
     // — Add message to UI
-    function addMessage(role, content, parseMarkdown = false) {
+    function addMessage(role, content, parseMarkdown = false, fullAnswer = null) {
         const wrap = document.createElement('div');
         wrap.className = `chatbot-msg ${role}`;
 
@@ -454,6 +465,14 @@ function initChatbot() {
 
         if (parseMarkdown && role === 'assistant') {
             bubble.innerHTML = renderMarkdown(content);
+            // Add "Open full answer" link if a full detailed answer exists
+            if (fullAnswer) {
+                const linkRow = document.createElement('div');
+                linkRow.className = 'chatbot-fulllink';
+                const href = '/chat?q=' + encodeURIComponent(lastUserQuestion || content.slice(0, 80));
+                linkRow.innerHTML = `<a href="${href}">Open full answer in Curevia AI &rarr;</a>`;
+                bubble.appendChild(linkRow);
+            }
         } else {
             bubble.textContent = content;
         }
@@ -461,6 +480,23 @@ function initChatbot() {
         wrap.appendChild(avatar);
         wrap.appendChild(bubble);
         msgArea.appendChild(wrap);
+        scrollToBottom();
+    }
+
+    // — AI-generated suggestion chips (redirect to full chat)
+    function addMiniSuggestions(suggestions) {
+        const row = document.createElement('div');
+        row.className = 'chatbot-ai-chips-row';
+        row.innerHTML = suggestions.map(s =>
+            `<button class="chatbot-ai-chip" data-q="${s.replace(/"/g, '&quot;')}">${escapeHtml(s)}</button>`
+        ).join('');
+        row.addEventListener('click', (e) => {
+            const chip = e.target.closest('.chatbot-ai-chip');
+            if (!chip) return;
+            const q = chip.getAttribute('data-q');
+            if (q) window.location.href = '/chat?q=' + encodeURIComponent(q);
+        });
+        msgArea.appendChild(row);
         scrollToBottom();
     }
 
@@ -1176,4 +1212,15 @@ function initFullPageChat() {
     renderSidebar();
     renderMessages();
     input.focus();
+
+    // ── Auto-send question from ?q= URL param (e.g. redirected from mini chatbot) ──
+    const urlQ = new URLSearchParams(window.location.search).get('q');
+    if (urlQ) {
+        // Clean the URL without reloading
+        window.history.replaceState({}, '', window.location.pathname);
+        input.value = urlQ;
+        sendBtn.disabled = false;
+        // Small delay so the page renders first
+        setTimeout(() => triggerSend(), 350);
+    }
 }

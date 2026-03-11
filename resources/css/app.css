@@ -1905,6 +1905,59 @@ footer::before {
     border-color: rgba(34, 242, 226, 0.35);
 }
 
+/* AI-generated suggestion chips inside chat messages area */
+.chatbot-ai-chips-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0.15rem 0.85rem 0.75rem;
+    animation: chatFadeIn 0.35s ease both;
+}
+@keyframes chatFadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.chatbot-ai-chip {
+    white-space: nowrap;
+    background: rgba(124,108,255,0.06);
+    border: 1px solid rgba(124,108,255,0.2);
+    color: rgba(180,172,255,0.9);
+    font-size: 0.71rem;
+    font-weight: 500;
+    padding: 0.28rem 0.65rem;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    flex-shrink: 0;
+    text-align: left;
+}
+.chatbot-ai-chip:hover {
+    background: rgba(124,108,255,0.14);
+    color: #a89fff;
+    border-color: rgba(124,108,255,0.45);
+    transform: translateY(-1px);
+}
+
+/* "Open full answer" link inside mini chatbot bubble */
+.chatbot-fulllink {
+    margin-top: 0.65rem;
+    padding-top: 0.55rem;
+    border-top: 1px solid rgba(34,242,226,0.1);
+}
+.chatbot-fulllink a {
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: var(--accent-cyan);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    opacity: 0.85;
+    transition: opacity 0.15s;
+}
+.chatbot-fulllink a:hover { opacity: 1; text-decoration: underline; }
+
 /* Input Area */
 .chatbot-input-area {
     padding: 0.6rem 0.85rem 0.55rem;
@@ -2461,7 +2514,7 @@ footer::before {
 .chat-suggestions-row {
     display: flex;
     justify-content: center;
-    padding: 0 0 1.1rem;
+    padding: 0 0 2rem;
     animation: chatMsgSlide 0.4s ease both;
 }
 .chat-suggestions-inner {
