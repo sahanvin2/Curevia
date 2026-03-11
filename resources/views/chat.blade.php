@@ -167,12 +167,12 @@
                         <span>Gemini</span>
                         <span class="model-badge">2.5 Flash</span>
                     </button>
-                    <button class="chat-model-btn" data-model="groq" title="Llama 3.3 70B via Groq — Ultra fast inference">
+                    <button class="chat-model-btn" data-model="groq" title="Llama 3.1 8B Instant via Groq — Fast inference">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
                             <polygon points="13,2 3,14 12,14 11,22 21,10 12,10" fill="currentColor"/>
                         </svg>
                         <span>Groq</span>
-                        <span class="model-badge">Llama 3.3</span>
+                        <span class="model-badge">Llama 3.1</span>
                     </button>
                     <button class="chat-model-btn" data-model="deepseek" title="DeepSeek Chat">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none">

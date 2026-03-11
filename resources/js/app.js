@@ -11,6 +11,66 @@ function escapeHtml(text) {
     return d.innerHTML;
 }
 
+/**
+ * Robustly extract answer/summary/suggestions from an AI response,
+ * handling cases where the backend returns raw JSON as the answer string.
+ */
+function cleanAiAnswer(raw, fallbackSuggestions = [], fallbackSummary = null) {
+    const s = (raw || '').trim();
+
+    // Doesn't look like JSON — return as-is
+    if (!s.startsWith('{') || !s.includes('"answer"')) {
+        return { answer: raw || '', suggestions: fallbackSuggestions, summary: fallbackSummary };
+    }
+
+    // Strategy 1: full JSON parse
+    try {
+        const p = JSON.parse(s);
+        if (p && p.answer) {
+            return {
+                answer:      p.answer,
+                suggestions: Array.isArray(p.suggestions) ? p.suggestions.slice(0, 4) : fallbackSuggestions,
+                summary:     p.summary     || fallbackSummary,
+            };
+        }
+    } catch(e) { /* continue */ }
+
+    // Strategy 2: regex-extract "answer" field value
+    const m = s.match(/"answer"\s*:\s*"((?:[^"\\]|\\[\s\S])*?)"/);
+    if (m) {
+        let ans = m[1];
+        try { ans = JSON.parse('"' + m[1] + '"'); }
+        catch(e) { ans = m[1].replace(/\\n/g, '\n').replace(/\\t/g, '\t').replace(/\\"/g, '"').replace(/\\\\/g, '\\'); }
+
+        // Extract suggestions
+        let sugs = fallbackSuggestions;
+        const sm = s.match(/"suggestions"\s*:\s*\[([^\]]*)\]/);
+        if (sm) {
+            sugs = [];
+            const re = /"((?:[^"\\]|\\.)*)"/g;
+            let gm;
+            while ((gm = re.exec(sm[1])) !== null) {
+                try { sugs.push(JSON.parse('"' + gm[1] + '"')); }
+                catch(e) { sugs.push(gm[1]); }
+            }
+            sugs = sugs.slice(0, 4);
+        }
+
+        // Extract summary
+        let summ = fallbackSummary;
+        const sumMatch = s.match(/"summary"\s*:\s*"((?:[^"\\]|\\[\s\S])*?)"/);
+        if (sumMatch) {
+            try { summ = JSON.parse('"' + sumMatch[1] + '"'); }
+            catch(e) { summ = sumMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"'); }
+        }
+
+        return { answer: ans, suggestions: sugs, summary: summ };
+    }
+
+    // Strategy 3: give up, keep raw
+    return { answer: raw || '', suggestions: fallbackSuggestions, summary: fallbackSummary };
+}
+
 document.addEventListener('DOMContentLoaded', () => {
 
     // — Star Field Generator —
@@ -439,21 +499,14 @@ function initChatbot() {
         .then(res => res.json())
         .then(data => {
             typingEl.remove();
-            let answer = data.answer || 'Sorry, I could not get a response.';
-            let summary = data.summary || null;
-            let suggestions = data.suggestions || [];
-
-            // Fallback: if the answer looks like raw JSON, try to parse it
-            if (answer.trim().startsWith('{') && answer.includes('"answer"')) {
-                try {
-                    const parsed = JSON.parse(answer);
-                    if (parsed.answer) {
-                        answer = parsed.answer;
-                        summary = parsed.summary || summary;
-                        suggestions = parsed.suggestions || suggestions;
-                    }
-                } catch(e) { /* not JSON, use as-is */ }
-            }
+            const cleaned = cleanAiAnswer(
+                data.answer || 'Sorry, I could not get a response.',
+                data.suggestions || [],
+                data.summary || null
+            );
+            const answer      = cleaned.answer;
+            const summary     = cleaned.summary;
+            const suggestions = cleaned.suggestions;
 
             const displayText = summary || answer;
             addMessage('assistant', displayText, true, answer);
@@ -667,7 +720,7 @@ function initFullPageChat() {
 
     const MODEL_META = {
         gemini:   { label: 'Gemini 2.5 Flash',    topbar: 'Gemini 2.5 Flash' },
-        groq:     { label: 'Groq · Llama 3.3 70B', topbar: 'Groq · Llama 3.3' },
+        groq:     { label: 'Groq · Llama 3.1 8B', topbar: 'Groq · Llama 3.1' },
         deepseek: { label: 'DeepSeek Chat',         topbar: 'DeepSeek Chat' },
     };
 
@@ -1139,19 +1192,13 @@ function initFullPageChat() {
         .then(res => res.json())
         .then(data => {
             typingRow.remove();
-            let answer = data.answer || 'Sorry, I could not get a response.';
-            let suggestions = data.suggestions || [];
-
-            // Fallback: if the answer looks like raw JSON, try to parse it
-            if (answer.trim().startsWith('{') && answer.includes('"answer"')) {
-                try {
-                    const parsed = JSON.parse(answer);
-                    if (parsed.answer) {
-                        answer = parsed.answer;
-                        suggestions = parsed.suggestions || suggestions;
-                    }
-                } catch(e) { /* not JSON, use as-is */ }
-            }
+            const cleaned = cleanAiAnswer(
+                data.answer || 'Sorry, I could not get a response.',
+                data.suggestions || [],
+                data.summary || null
+            );
+            const answer      = cleaned.answer;
+            const suggestions = cleaned.suggestions;
 
             conv.messages.push({ role: 'assistant', content: answer });
             saveConversations();

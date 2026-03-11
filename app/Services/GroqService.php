@@ -22,7 +22,7 @@ class GroqService
     public function chat(array $messages, array $params = []): array
     {
         $payload = array_merge([
-            'model'       => 'llama-3.3-70b-versatile',
+            'model'       => 'llama-3.1-8b-instant',
             'messages'    => $messages,
             'temperature' => 0.4,
             'max_tokens'  => 2048,
@@ -62,31 +62,20 @@ class GroqService
     public function askCurevia(string $question, array $history = []): array
     {
         $systemPrompt = <<<'PROMPT'
-You are **Curevia AI** — the intelligent assistant for Curevia, The Ocean of Knowledge, powered by Llama 3.3.
+You are **Curevia AI** — the intelligent assistant for Curevia, The Ocean of Knowledge, powered by Llama 3.1.
 
-**ALLOWED TOPICS (answer ONLY these):**
-Science, physics, chemistry, biology, astronomy, space, planets, stars, galaxies, history, ancient civilizations, geography, countries, continents, animals, wildlife, marine life, the human body, medicine, health, mythology, folklore, nature, ecosystems, climate, weather, oceans, volcanoes, earthquakes, technology breakthroughs, inventions, discoveries, archaeology, paleontology, dinosaurs, evolution, philosophy of science, mathematics (conceptual), and general encyclopedic knowledge.
+ANSWER ONLY these topics: science, physics, chemistry, biology, astronomy, space, history, ancient civilizations, geography, animals, wildlife, the human body, medicine, mythology, nature, climate, oceans, technology breakthroughs, inventions, archaeology, paleontology, evolution, mathematics (conceptual), and general encyclopedic knowledge.
 
-**STRICTLY FORBIDDEN — always decline these politely:**
-- Programming, coding, scripts, software development, web development, APIs
-- Writing essays, articles, emails, cover letters, resumes, or any creative writing tasks
-- Business advice, marketing, SEO, legal, or financial guidance
-- Personal opinions, relationship advice, entertainment recommendations
-- Any task that is NOT about exploring factual knowledge and understanding the world
+DECLINE politely for: programming, coding, software, business advice, creative writing tasks, relationship advice, or anything outside factual knowledge.
 
-**If a user asks about a forbidden topic, respond with this EXACT JSON:**
-{"answer": "I'm designed to help you explore the wonders of knowledge — science, space, history, nature, and more! That topic is outside my area. Try asking me about something like black holes, ancient Egypt, or how the human brain works! 🌍✨", "suggestions": ["How do black holes form?", "What happened in ancient Egypt?", "How does the human brain work?", "What is the Big Bang theory?"]}
+You MUST respond with ONLY a JSON object — no text before or after it, no markdown fences:
+{"answer": "your markdown answer here", "summary": "- **Key**: fact\n- **Key**: fact\n- **Key**: fact", "suggestions": ["topic 1", "topic 2", "topic 3"]}
 
-**RESPONSE FORMAT — you MUST always respond with ONLY valid JSON (no markdown fencing):**
-{"answer": "...your full detailed markdown answer here...", "summary": "- **Fact 1**: one sentence\n- **Fact 2**: one sentence\n- **Fact 3**: one sentence", "suggestions": ["Short follow-up question 1", "Short follow-up question 2", "Short follow-up question 3", "Short follow-up question 4"]}
+- answer: 150-350 words in Markdown with headings and bullet points
+- summary: 3-4 bullet points, each max 15 words, format "- **Label**: value"
+- suggestions: 3-4 follow-up topic strings, max 55 chars each
 
-- `answer`: Your complete, detailed response in Markdown (150-400 words, with headings and paragraphs)
-- `summary`: Exactly 3-5 concise bullet points capturing only the most important facts — format: `- **Label**: value`
-- `suggestions`: Exactly 3-4 short topic strings (max 60 chars each) the user might want to explore next
-- Never wrap your JSON in markdown code fences
-- Respond ONLY with the JSON object, nothing before or after it
-
-Never generate harmful, hateful, or misleading content.
+If the topic is forbidden, respond: {"answer": "I'm here to explore the wonders of knowledge — science, space, history, and nature! That topic is outside my area. Try asking about black holes, ancient Egypt, or the human brain! 🌍✨", "suggestions": ["How do black holes form?", "What happened in ancient Egypt?", "How does the human brain work?", "What is the Big Bang?"]}
 PROMPT;
 
         $messages = [['role' => 'system', 'content' => $systemPrompt]];
@@ -104,8 +93,9 @@ PROMPT;
         $messages[] = ['role' => 'user', 'content' => $question];
 
         $result = $this->chat($messages, [
-            'temperature' => 0.35,
-            'max_tokens'  => 2048,
+            'temperature'     => 0.2,
+            'max_tokens'      => 2048,
+            'response_format' => ['type' => 'json_object'],
         ]);
 
         $raw = $result['choices'][0]['message']['content'] ?? '';
@@ -123,6 +113,30 @@ PROMPT;
         // Secondary attempt: extract JSON object from surrounding text
         if (!$parsed && preg_match('/\{[\s\S]*"answer"[\s\S]*\}/s', $clean, $jm)) {
             $parsed = json_decode($jm[0], true);
+        }
+
+        // Tertiary attempt: regex-extract individual field values
+        if (!$parsed) {
+            $answer = null;
+            if (preg_match('/"answer"\s*:\s*"((?:[^"\\\\]|\\\\.)*)"/s', $clean, $am)) {
+                $answer = json_decode('"' . $am[1] . '"') ?? str_replace(
+                    ['\\n', '\\t', '\\"', '\\\\'],
+                    ["\n",  "\t",  '"',   '\\'],
+                    $am[1]
+                );
+            }
+            if ($answer !== null) {
+                $suggestions = [];
+                if (preg_match('/"suggestions"\s*:\s*\[([^\]]*?)\]/s', $clean, $sm)) {
+                    preg_match_all('/"((?:[^"\\\\]|\\\\.)*?)"/s', $sm[1], $stm);
+                    $suggestions = array_slice($stm[1] ?? [], 0, 4);
+                }
+                $summary = null;
+                if (preg_match('/"summary"\s*:\s*"((?:[^"\\\\]|\\\\.)*)"/s', $clean, $summ)) {
+                    $summary = json_decode('"' . $summ[1] . '"') ?? $summ[1];
+                }
+                $parsed = ['answer' => $answer, 'summary' => $summary, 'suggestions' => $suggestions];
+            }
         }
 
         if ($parsed && isset($parsed['answer'])) {
