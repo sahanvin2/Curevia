@@ -2256,11 +2256,10 @@ footer::before {
 }
 .chat-messages-area::-webkit-scrollbar { width: 4px; }
 .chat-messages-area::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
-/* Spacer that grows when few messages (pushes them to bottom)
-   and shrinks to zero when messages overflow (allows scrolling) */
+/* Spacer that pushes messages to the bottom when there are few,
+   and collapses when messages fill the area */
 .chat-msgs-anchor {
-    display: none;
-    flex: 1 1 0;
+    flex: 1 1 auto;
     min-height: 0;
 }
 
@@ -2559,6 +2558,12 @@ footer::before {
 }
 .chat-suggestion-chip:active {
     transform: translateY(0);
+}
+.chat-suggestions-row.fading-out {
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none;
 }
 
 /* Input Area */

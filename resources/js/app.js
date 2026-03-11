@@ -435,14 +435,28 @@ function initChatbot() {
         .then(res => res.json())
         .then(data => {
             typingEl.remove();
-            // Mini chatbot shows summary (bullet points); full answer stored in history
-            const summary = data.summary || data.answer || 'Sorry, I could not get a response.';
-            const fullAnswer = data.answer || summary;
-            addMessage('assistant', summary, true, fullAnswer);
-            history.push({ role: 'assistant', content: fullAnswer });
+            let answer = data.answer || 'Sorry, I could not get a response.';
+            let summary = data.summary || null;
+            let suggestions = data.suggestions || [];
+
+            // Fallback: if the answer looks like raw JSON, try to parse it
+            if (answer.trim().startsWith('{') && answer.includes('"answer"')) {
+                try {
+                    const parsed = JSON.parse(answer);
+                    if (parsed.answer) {
+                        answer = parsed.answer;
+                        summary = parsed.summary || summary;
+                        suggestions = parsed.suggestions || suggestions;
+                    }
+                } catch(e) { /* not JSON, use as-is */ }
+            }
+
+            const displayText = summary || answer;
+            addMessage('assistant', displayText, true, answer);
+            history.push({ role: 'assistant', content: answer });
             // AI-generated suggestion chips → redirect to full chat
-            if (data.suggestions && data.suggestions.length > 0) {
-                addMiniSuggestions(data.suggestions);
+            if (suggestions && suggestions.length > 0) {
+                addMiniSuggestions(suggestions);
             }
             setStatus('online');
         })
@@ -711,11 +725,9 @@ function initFullPageChat() {
 
         if (!conv || conv.messages.length === 0) {
             if (welcome) welcome.style.display = 'flex';
-            if (anchor) anchor.style.display = 'none';
             return;
         }
         if (welcome) welcome.style.display = 'none';
-        if (anchor) anchor.style.display = 'block';
 
         conv.messages.forEach((msg, idx) => {
             appendMsgRow(msg.role, msg.content, false, idx);
@@ -749,7 +761,6 @@ function initFullPageChat() {
     // ── Append a single message row ──
     function appendMsgRow(role, content, animate, msgIdx) {
         if (welcome) welcome.style.display = 'none';
-        if (anchor) anchor.style.display = 'block';
 
         const row = document.createElement('div');
         row.className = `chat-msg-row ${role === 'user' ? 'user-row' : 'assistant-row'}${animate ? ' animate-in' : ''}`;
@@ -1066,8 +1077,11 @@ function initFullPageChat() {
         renderSidebar();
 
         // Remove any existing suggestion chips before sending
+        // (new ones will appear after the response)
         if (currentSuggestionsEl) {
-            currentSuggestionsEl.remove();
+            currentSuggestionsEl.classList.add('fading-out');
+            const old = currentSuggestionsEl;
+            setTimeout(() => old.remove(), 300);
             currentSuggestionsEl = null;
         }
 
@@ -1096,15 +1110,28 @@ function initFullPageChat() {
         .then(res => res.json())
         .then(data => {
             typingRow.remove();
-            const answer = data.answer || 'Sorry, I could not get a response.';
+            let answer = data.answer || 'Sorry, I could not get a response.';
+            let suggestions = data.suggestions || [];
+
+            // Fallback: if the answer looks like raw JSON, try to parse it
+            if (answer.trim().startsWith('{') && answer.includes('"answer"')) {
+                try {
+                    const parsed = JSON.parse(answer);
+                    if (parsed.answer) {
+                        answer = parsed.answer;
+                        suggestions = parsed.suggestions || suggestions;
+                    }
+                } catch(e) { /* not JSON, use as-is */ }
+            }
+
             conv.messages.push({ role: 'assistant', content: answer });
             saveConversations();
             const aidx = conv.messages.length - 1;
             appendMsgRow('assistant', answer, true, aidx);
             scrollToBottom();
             // Show related topic suggestions
-            if (data.suggestions && data.suggestions.length > 0) {
-                appendSuggestions(data.suggestions);
+            if (suggestions.length > 0) {
+                appendSuggestions(suggestions);
             }
         })
         .catch(() => {

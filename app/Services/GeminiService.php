@@ -140,10 +140,22 @@ PROMPT;
         $raw = $result['candidates'][0]['content']['parts'][0]['text'] ?? '';
 
         // Strip markdown fencing if Gemini ignored the instruction
-        $clean = preg_replace('/^```(?:json)?\s*/i', '', trim($raw));
+        $clean = trim($raw);
+        // Remove ```json ... ``` or ``` ... ```
+        if (preg_match('/^```(?:json)?\s*\n?(.+?)\n?\s*```$/s', $clean, $m)) {
+            $clean = trim($m[1]);
+        }
+        // Also try removing just leading/trailing fences
+        $clean = preg_replace('/^```(?:json)?\s*/i', '', $clean);
         $clean = preg_replace('/\s*```$/', '', $clean);
 
+        // Try parsing the cleaned text as JSON
         $parsed = json_decode($clean, true);
+
+        // If that failed, try finding JSON object inside the text
+        if (!$parsed && preg_match('/\{[\s\S]*"answer"[\s\S]*\}/s', $clean, $jm)) {
+            $parsed = json_decode($jm[0], true);
+        }
         if ($parsed && isset($parsed['answer'])) {
             return [
                 'answer'      => $parsed['answer'],
