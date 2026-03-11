@@ -809,6 +809,7 @@ function initFullPageChat() {
         if (isBot) row.dataset.rawContent = content;
 
         msgArea.appendChild(row);
+        return row;
     }
 
     // ── Close all open dropdowns ──
@@ -1076,15 +1077,6 @@ function initFullPageChat() {
         saveConversations();
         renderSidebar();
 
-        // Remove any existing suggestion chips before sending
-        // (new ones will appear after the response)
-        if (currentSuggestionsEl) {
-            currentSuggestionsEl.classList.add('fading-out');
-            const old = currentSuggestionsEl;
-            setTimeout(() => old.remove(), 300);
-            currentSuggestionsEl = null;
-        }
-
         const msgIdx = conv.messages.length - 1;
         appendMsgRow('user', message, true, msgIdx);
         input.value = '';
@@ -1127,8 +1119,9 @@ function initFullPageChat() {
             conv.messages.push({ role: 'assistant', content: answer });
             saveConversations();
             const aidx = conv.messages.length - 1;
-            appendMsgRow('assistant', answer, true, aidx);
-            scrollToBottom();
+            const botRow = appendMsgRow('assistant', answer, true, aidx);
+            // Scroll to TOP of new bot message so user reads from beginning
+            scrollToMsgTop(botRow);
             // Show related topic suggestions
             if (suggestions.length > 0) {
                 appendSuggestions(suggestions);
@@ -1214,6 +1207,13 @@ function initFullPageChat() {
     // ── Utilities ──
     function scrollToBottom() {
         requestAnimationFrame(() => { msgArea.scrollTop = msgArea.scrollHeight; });
+    }
+
+    function scrollToMsgTop(el) {
+        requestAnimationFrame(() => {
+            const top = el.offsetTop - msgArea.offsetTop;
+            msgArea.scrollTo({ top: Math.max(0, top - 12), behavior: 'smooth' });
+        });
     }
 
     function chatRenderMarkdown(text) {
