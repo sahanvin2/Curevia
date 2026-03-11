@@ -134,6 +134,33 @@ body {
 .nav-link.active { color: var(--accent-cyan); }
 .nav-link.active::after { width: 100%; }
 
+/* Desktop nav — hidden on mobile, flex on md+ */
+.desktop-nav {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+@media (max-width: 768px) {
+    .desktop-nav { display: none !important; }
+}
+
+/* Hamburger — visible only on mobile */
+.hamburger-mobile { display: none; }
+@media (max-width: 768px) {
+    .hamburger-mobile { display: flex; }
+}
+
+/* Desktop-only elements */
+.desktop-only { display: flex; }
+.desktop-only-inline { display: block; }
+@media (max-width: 768px) {
+    .desktop-only { display: none !important; }
+    .desktop-only-inline { display: none !important; }
+}
+@media (max-width: 1024px) {
+    .desktop-only-inline { display: none !important; }
+}
+
 /* ═══════════════════════════════════════════
    NAVBAR — ICON BUTTONS, AVATAR & DROPDOWN
 ═══════════════════════════════════════════ */

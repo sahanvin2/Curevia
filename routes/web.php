@@ -51,6 +51,18 @@ Route::get('/api/search', [SearchController::class, 'search'])->name('api.search
 Route::post('/api/chatbot', [ChatbotController::class, 'send'])->name('api.chatbot');
 Route::post('/api/chatbot/share', [ChatbotController::class, 'shareAsPost'])->middleware('auth')->name('api.chatbot.share');
 
+// Cookie consent
+Route::post('/api/cookie-consent', function (\Illuminate\Http\Request $request) {
+    $request->validate(['consent' => 'required|in:all,essential,reject']);
+    \App\Models\CookieConsent::create([
+        'ip_hash'        => hash('sha256', $request->ip() . config('app.key')),
+        'user_id'        => auth()->id(),
+        'consent_type'   => $request->consent,
+        'user_agent_hash'=> hash('sha256', $request->userAgent() ?? ''),
+    ]);
+    return response()->json(['ok' => true]);
+})->name('api.cookie-consent');
+
 // Full-page Chatbot
 Route::get('/chat', [ChatbotController::class, 'index'])->name('chat');
 
@@ -85,8 +97,27 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth')->prefix('admin')->group(function () {
+use App\Http\Controllers\ContributorController;
+
+Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+
+    // Articles management
+    Route::get('/articles', [AdminController::class, 'articlesIndex'])->name('admin.articles.index');
+    Route::get('/articles/create', [AdminController::class, 'articlesCreate'])->name('admin.articles.create');
+    Route::post('/articles', [AdminController::class, 'articlesStore'])->name('admin.articles.store');
+    Route::get('/articles/{article}/edit', [AdminController::class, 'articlesEdit'])->name('admin.articles.edit');
+    Route::put('/articles/{article}', [AdminController::class, 'articlesUpdate'])->name('admin.articles.update');
+    Route::delete('/articles/{article}', [AdminController::class, 'articlesDestroy'])->name('admin.articles.destroy');
+
+    // Users management
+    Route::get('/users', [AdminController::class, 'usersIndex'])->name('admin.users.index');
+    Route::get('/users/{user}/edit', [AdminController::class, 'usersEdit'])->name('admin.users.edit');
+    Route::put('/users/{user}', [AdminController::class, 'usersUpdate'])->name('admin.users.update');
+    Route::delete('/users/{user}', [AdminController::class, 'usersDestroy'])->name('admin.users.destroy');
+
+    // Analytics
+    Route::get('/analytics', [AdminController::class, 'analytics'])->name('admin.analytics');
 
     // Product management
     Route::get('/products', [AdminController::class, 'productsIndex'])->name('admin.products.index');
@@ -95,4 +126,15 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::get('/products/{product}/edit', [AdminController::class, 'productsEdit'])->name('admin.products.edit');
     Route::put('/products/{product}', [AdminController::class, 'productsUpdate'])->name('admin.products.update');
     Route::delete('/products/{product}', [AdminController::class, 'productsDestroy'])->name('admin.products.destroy');
+});
+
+// Contributor routes
+Route::middleware(['auth', 'contributor'])->prefix('contributor')->group(function () {
+    Route::get('/dashboard', [ContributorController::class, 'dashboard'])->name('contributor.dashboard');
+    Route::get('/articles', [ContributorController::class, 'articles'])->name('contributor.articles');
+    Route::get('/articles/create', [ContributorController::class, 'create'])->name('contributor.articles.create');
+    Route::post('/articles', [ContributorController::class, 'store'])->name('contributor.articles.store');
+    Route::get('/articles/{article}/edit', [ContributorController::class, 'edit'])->name('contributor.articles.edit');
+    Route::put('/articles/{article}', [ContributorController::class, 'update'])->name('contributor.articles.update');
+    Route::delete('/articles/{article}', [ContributorController::class, 'destroy'])->name('contributor.articles.destroy');
 });

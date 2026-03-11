@@ -73,7 +73,7 @@
             </a>
 
             {{-- Desktop Navigation --}}
-            <div style="display:flex;align-items:center;gap:2rem;" class="hidden md:flex" role="menubar">
+            <div class="desktop-nav" role="menubar">
                 <a href="{{ route('home') }}" class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" role="menuitem">Home</a>
                 <a href="{{ route('encyclopedia.index') }}" class="nav-link {{ request()->routeIs('encyclopedia.*') ? 'active' : '' }}" role="menuitem">Encyclopedia</a>
                 <a href="{{ route('stories.index') }}" class="nav-link {{ request()->routeIs('stories.*') ? 'active' : '' }}" role="menuitem">Stories</a>
@@ -100,8 +100,8 @@
                     <div style="position:relative;" id="user-menu-wrapper">
                         <button id="user-menu-toggle" class="nav-avatar-btn" aria-label="User menu" aria-haspopup="true" aria-expanded="false">
                             <div class="nav-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
-                            <span class="hidden lg:block" style="font-size:0.8rem;color:var(--text-secondary);font-weight:500;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ auth()->user()->name }}</span>
-                            <svg id="user-menu-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="color:var(--text-muted);transition:transform .25s ease;flex-shrink:0;" class="hidden lg:block"><polyline points="6 9 12 15 18 9"/></svg>
+                            <span class="desktop-only-inline" style="font-size:0.8rem;color:var(--text-secondary);font-weight:500;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ auth()->user()->name }}</span>
+                            <svg id="user-menu-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="color:var(--text-muted);transition:transform .25s ease;flex-shrink:0;" class="desktop-only-inline"><polyline points="6 9 12 15 18 9"/></svg>
                         </button>
 
                         {{-- Dropdown Menu --}}
@@ -130,11 +130,11 @@
                     </div>
                 @else
                     <a href="{{ route('login') }}" class="btn-secondary" style="padding:0.45rem 1.1rem;font-size:0.8rem;">Login</a>
-                    <a href="{{ route('register') }}" class="btn-primary hidden md:flex" style="padding:0.45rem 1.1rem;font-size:0.8rem;">Join Free</a>
+                    <a href="{{ route('register') }}" class="btn-primary desktop-only" style="padding:0.45rem 1.1rem;font-size:0.8rem;">Join Free</a>
                 @endauth
 
                 {{-- Mobile hamburger --}}
-                <button onclick="toggleMobileMenu()" id="hamburger-btn" aria-label="Open menu" aria-expanded="false" class="nav-icon-btn md:hidden">
+                <button onclick="toggleMobileMenu()" id="hamburger-btn" aria-label="Open menu" aria-expanded="false" class="nav-icon-btn hamburger-mobile">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
                         <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
                     </svg>
@@ -211,6 +211,7 @@
     {{-- ═══════ FOOTER ═══════ --}}
     <footer style="position:relative;padding:5rem 0 2.5rem;margin-top:6rem;">
         <div style="max-width:1280px;margin:0 auto;padding:0 1.5rem;">
+
             <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3.5rem;" class="grid-cols-footer">
 
                 {{-- Brand --}}
@@ -256,7 +257,7 @@
                     <a href="{{ route('discover') }}" class="footer-link">Discover</a>
                     <a href="{{ route('shop.index') }}" class="footer-link">Shop</a>
                     <a href="#contributors" class="footer-link">Contributors</a>
-                    <a href="#" class="footer-link">Sitemap</a>
+                    <a href="{{ route('advertise') }}" class="footer-link">Donors &amp; Sponsors</a>
                 </div>
 
                 {{-- Company --}}
@@ -378,6 +379,107 @@
             </div>
         </div>
     </div>
+    {{-- ═══════ COOKIE CONSENT BANNER ═══════ --}}
+    <div id="cookie-banner" role="dialog" aria-modal="true" aria-label="Cookie consent">
+        <div class="cookie-inner">
+            <div style="display:flex;align-items:flex-start;gap:1rem;flex-wrap:wrap;">
+
+                {{-- Icon + Text --}}
+                <div style="flex:1;min-width:260px;">
+                    <div style="display:flex;align-items:center;gap:0.65rem;margin-bottom:0.75rem;">
+                        <div style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,rgba(34,242,226,0.15),rgba(124,108,255,0.1));border:1px solid rgba(34,242,226,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22F2E2" stroke-width="1.8" stroke-linecap="round">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10c0-.34-.02-.67-.05-1"/>
+                                <path d="M17 3.34A10 10 0 0 1 21.65 8"/>
+                                <circle cx="15" cy="7" r="1" fill="#22F2E2" stroke="none"/>
+                                <circle cx="19" cy="11" r="1" fill="#22F2E2" stroke="none"/>
+                                <circle cx="9" cy="9" r="1" fill="#7C6CFF" stroke="none"/>
+                                <circle cx="7" cy="14" r="1" fill="#7C6CFF" stroke="none"/>
+                                <circle cx="11" cy="17" r="1" fill="#22F2E2" stroke="none"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 style="font-size:0.95rem;font-weight:800;color:var(--text-primary);margin:0;line-height:1.2;">Your Privacy on Curevia</h4>
+                            <p style="font-size:0.7rem;color:var(--text-muted);margin:0.1rem 0 0;">We use cookies to improve your knowledge journey 🌌</p>
+                        </div>
+                    </div>
+                    <p style="font-size:0.78rem;color:#94A3B8;line-height:1.65;margin:0 0 0.9rem;">
+                        Curevia uses cookies to keep the site working, understand how you explore knowledge, and personalize your experience. We never sell your data. By clicking <strong style="color:var(--text-primary);">Accept All</strong>, you agree to our
+                        <a href="{{ route('privacy') }}" style="color:#22F2E2;text-decoration:none;">Privacy Policy</a> and
+                        <a href="{{ route('terms') }}" style="color:#22F2E2;text-decoration:none;">Terms of Use</a>.
+                    </p>
+
+                    {{-- Cookie types --}}
+                    <div class="cookie-types-row" style="display:flex;flex-wrap:wrap;gap:0.5rem;">
+                        <span class="cookie-type-pill" style="background:rgba(34,242,226,0.08);border:1px solid rgba(34,242,226,0.2);color:#22F2E2;">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            Essential
+                        </span>
+                        <span class="cookie-type-pill" style="background:rgba(124,108,255,0.08);border:1px solid rgba(124,108,255,0.2);color:#7C6CFF;">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                            Analytics
+                        </span>
+                        <span class="cookie-type-pill" style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);color:#F59E0B;">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+                            Personalization
+                        </span>
+                    </div>
+                </div>
+
+                {{-- Action Buttons --}}
+                <div class="cookie-actions" style="display:flex;flex-direction:column;gap:0.6rem;flex-shrink:0;justify-content:center;padding-top:0.25rem;">
+                    <button class="cookie-btn cookie-btn-accept" id="cookie-accept-all" onclick="cookieConsent('all')">
+                        ✓ Accept All
+                    </button>
+                    <button class="cookie-btn cookie-btn-manage" id="cookie-manage" onclick="cookieConsent('essential')">
+                        ⚙ Essential Only
+                    </button>
+                    <button class="cookie-btn cookie-btn-reject" onclick="cookieConsent('reject')">
+                        ✕ Reject
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        var COOKIE_KEY = 'curevia_cookie_consent';
+        var banner = document.getElementById('cookie-banner');
+
+        function cookieConsent(choice) {
+            try { localStorage.setItem(COOKIE_KEY, choice + ':' + Date.now()); } catch(e){}
+            // Store consent securely on the server
+            fetch('{{ route("api.cookie-consent") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({ consent: choice })
+            }).catch(function(){});
+            banner.classList.remove('visible');
+            setTimeout(function(){ banner.style.display = 'none'; }, 500);
+        }
+        window.cookieConsent = cookieConsent;
+
+        function shouldShow() {
+            try {
+                var v = localStorage.getItem(COOKIE_KEY);
+                if (!v) return true;
+                var ts = parseInt((v.split(':')[1]) || '0', 10);
+                // Re-ask after 365 days
+                return Date.now() - ts > 365 * 24 * 60 * 60 * 1000;
+            } catch(e) { return true; }
+        }
+
+        if (shouldShow()) {
+            setTimeout(function() { banner.classList.add('visible'); }, 1200);
+        } else {
+            banner.style.display = 'none';
+        }
+    })();
+    </script>
 </body>
 </html>
 
@@ -387,5 +489,82 @@
 }
 @media (max-width: 480px) {
     .grid-cols-footer { grid-template-columns: 1fr !important; }
+}
+
+/* ═══ Cookie Consent ═══ */
+#cookie-banner {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 99999;
+    transform: translateY(100%);
+    transition: transform 0.45s cubic-bezier(0.34,1.56,0.64,1);
+    padding: 0 1rem 1rem;
+}
+#cookie-banner.visible { transform: translateY(0); }
+.cookie-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    background: rgba(11,15,20,0.92);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(34,242,226,0.18);
+    border-radius: 18px;
+    box-shadow: 0 -8px 48px rgba(34,242,226,0.06), 0 24px 64px rgba(0,0,0,0.6);
+    padding: 1.5rem 1.75rem;
+    position: relative;
+    overflow: hidden;
+}
+.cookie-inner::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #22F2E2, #7C6CFF, #22F2E2, transparent);
+    animation: shimmer-line 3s infinite linear;
+}
+@keyframes shimmer-line {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+.cookie-type-pill {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    font-size: 0.72rem; font-weight: 600;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    cursor: default;
+}
+.cookie-btn {
+    padding: 0.6rem 1.35rem;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+}
+.cookie-btn-accept {
+    background: linear-gradient(135deg, #22F2E2, #7C6CFF);
+    color: #0B0F14;
+}
+.cookie-btn-accept:hover { opacity: 0.88; transform: translateY(-1px); }
+.cookie-btn-manage {
+    background: rgba(34,242,226,0.06);
+    border: 1px solid rgba(34,242,226,0.25) !important;
+    color: var(--accent-cyan, #22F2E2);
+}
+.cookie-btn-manage:hover { background: rgba(34,242,226,0.12); }
+.cookie-btn-reject {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    color: var(--text-muted, #64748B);
+    font-weight: 500;
+}
+.cookie-btn-reject:hover { border-color: rgba(255,255,255,0.2) !important; color: #94A3B8; }
+@media (max-width: 640px) {
+    .cookie-inner { padding: 1.2rem 1.1rem; border-radius: 14px; }
+    .cookie-actions { flex-direction: column !important; }
+    .cookie-actions .cookie-btn { width: 100%; text-align: center; }
+    .cookie-types-row { flex-direction: column !important; gap: 0.5rem !important; }
 }
 </style>
