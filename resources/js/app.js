@@ -716,20 +716,19 @@ function initFullPageChat() {
 
     const modelBtns   = document.querySelectorAll('.chat-model-btn');
     const modelLabel  = document.getElementById('chat-model-label');
-    const topbarTitle = document.getElementById('chat-topbar-title');
 
     const MODEL_META = {
-        gemini:   { label: 'Gemini 2.5 Flash',    topbar: 'Gemini 2.5 Flash' },
-        groq:     { label: 'Groq · Llama 3.1 8B', topbar: 'Groq · Llama 3.1' },
-        deepseek: { label: 'DeepSeek Chat',         topbar: 'DeepSeek Chat' },
+        gemini:    { label: 'Gemini 2.5 Flash' },
+        groq:      { label: 'Groq · Llama 3.1 8B' },
+        'groq-70b':{ label: 'Groq · Llama 3.3 70B' },
+        deepseek:  { label: 'DeepSeek Chat' },
     };
 
     function applyModelUI(model) {
         modelBtns.forEach(btn => {
             btn.classList.toggle('active', btn.dataset.model === model);
         });
-        if (modelLabel) modelLabel.textContent = MODEL_META[model]?.label || model;
-        if (topbarTitle) topbarTitle.textContent = MODEL_META[model]?.topbar || 'Curevia AI';
+        if (modelLabel) modelLabel.textContent = MODEL_META[model]?.label || 'Curevia AI';
     }
 
     applyModelUI(selectedModel);

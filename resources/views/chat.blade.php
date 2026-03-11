@@ -182,6 +182,13 @@
                         <span>DeepSeek</span>
                         <span class="model-badge">Chat</span>
                     </button>
+                    <button class="chat-model-btn" data-model="groq-70b" title="Llama 3.3 70B via Groq — 128k context, highest quality">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" fill="currentColor"/>
+                        </svg>
+                        <span>Groq</span>
+                        <span class="model-badge">70B · 128k</span>
+                    </button>
                 </div>
 
                 <div class="chat-input-box">

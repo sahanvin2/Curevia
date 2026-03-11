@@ -2042,6 +2042,8 @@ footer::before {
 .chat-sidebar {
     width: 270px;
     min-width: 270px;
+    height: 100vh;
+    overflow: hidden;
     background: #07090D;
     border-right: 1px solid rgba(255,255,255,0.05);
     display: flex;
@@ -2597,7 +2599,10 @@ footer::before {
     gap: 0.3rem;
     margin-bottom: 0.55rem;
     flex-wrap: wrap;
+    overflow-x: auto;
+    scrollbar-width: none;
 }
+.chat-model-selector::-webkit-scrollbar { display: none; }
 .chat-model-btn {
     display: inline-flex;
     align-items: center;
@@ -2634,6 +2639,11 @@ footer::before {
     background: rgba(59,130,246,0.07);
     border-color: rgba(59,130,246,0.25);
     color: #60a5fa;
+}
+.chat-model-btn[data-model="groq-70b"].active {
+    background: rgba(52,211,153,0.07);
+    border-color: rgba(52,211,153,0.25);
+    color: #34d399;
 }
 .model-badge {
     font-size: 0.65rem;

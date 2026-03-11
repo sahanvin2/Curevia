@@ -23,7 +23,7 @@ class ChatbotController extends Controller
     {
         $request->validate([
             'message' => 'required|string|max:2000',
-            'model'   => 'nullable|string|in:gemini,groq,deepseek',
+            'model'   => 'nullable|string|in:gemini,groq,groq-70b,deepseek',
             'history' => 'nullable|array|max:20',
             'history.*.role'    => 'required_with:history|string|in:user,assistant',
             'history.*.content' => 'required_with:history|string|max:5000',
@@ -35,7 +35,8 @@ class ChatbotController extends Controller
 
         try {
             $result = match ($model) {
-                'groq'     => app(GroqService::class)->askCurevia($message, $history),
+                'groq'     => app(GroqService::class)->askCurevia($message, $history, 'llama-3.1-8b-instant'),
+                'groq-70b' => app(GroqService::class)->askCurevia($message, $history, 'llama-3.3-70b-versatile'),
                 'deepseek' => app(DeepSeekService::class)->askCurevia($message, $history),
                 default    => app(GeminiService::class)->askCurevia($message, $history),
             };

@@ -59,7 +59,7 @@ class GroqService
      * Get a knowledge-focused answer for the Curevia chatbot.
      * Returns array: ['answer' => string (markdown), 'summary' => string|null, 'suggestions' => string[]]
      */
-    public function askCurevia(string $question, array $history = []): array
+    public function askCurevia(string $question, array $history = [], string $model = 'llama-3.1-8b-instant'): array
     {
         $systemPrompt = <<<'PROMPT'
 You are **Curevia AI** — the intelligent assistant for Curevia, The Ocean of Knowledge, powered by Llama 3.1.
@@ -93,6 +93,7 @@ PROMPT;
         $messages[] = ['role' => 'user', 'content' => $question];
 
         $result = $this->chat($messages, [
+            'model'           => $model,
             'temperature'     => 0.2,
             'max_tokens'      => 2048,
             'response_format' => ['type' => 'json_object'],
