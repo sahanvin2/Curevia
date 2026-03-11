@@ -189,6 +189,13 @@
                         <span>Groq</span>
                         <span class="model-badge">70B · 128k</span>
                     </button>
+                    <button class="chat-model-btn" data-model="gpt-oss-20b" title="OpenAI GPT OSS 20B via Groq — 128k context">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                            <path d="M20.5 11a8.5 8.5 0 1 0-16.7 2.2C4.6 16 7 18 9.5 18.9V21h5v-2.1c2.5-.9 4.9-2.9 5.7-5.7.1-.4.3-1.4.3-2.2z" fill="currentColor" opacity="0.85"/>
+                        </svg>
+                        <span>GPT OSS</span>
+                        <span class="model-badge">20B · 128k</span>
+                    </button>
                 </div>
 
                 <div class="chat-input-box">

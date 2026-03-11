@@ -718,10 +718,11 @@ function initFullPageChat() {
     const modelLabel  = document.getElementById('chat-model-label');
 
     const MODEL_META = {
-        gemini:    { label: 'Gemini 2.5 Flash' },
-        groq:      { label: 'Groq · Llama 3.1 8B' },
-        'groq-70b':{ label: 'Groq · Llama 3.3 70B' },
-        deepseek:  { label: 'DeepSeek Chat' },
+        gemini:       { label: 'Gemini 2.5 Flash' },
+        groq:         { label: 'Groq · Llama 3.1 8B' },
+        'groq-70b':   { label: 'Groq · Llama 3.3 70B' },
+        deepseek:     { label: 'DeepSeek Chat' },
+        'gpt-oss-20b':{ label: 'GPT OSS 20B · 128k' },
     };
 
     function applyModelUI(model) {
