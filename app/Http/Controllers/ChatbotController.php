@@ -23,7 +23,7 @@ class ChatbotController extends Controller
     {
         $request->validate([
             'message' => 'required|string|max:2000',
-            'model'   => 'nullable|string|in:gemini,groq,groq-70b,deepseek,gpt-oss-20b',
+            'model'   => 'nullable|string|in:gemini,groq,groq-70b,llama4,gpt-oss-20b',
             'history' => 'nullable|array|max:20',
             'history.*.role'    => 'required_with:history|string|in:user,assistant',
             'history.*.content' => 'required_with:history|string|max:5000',
@@ -37,8 +37,8 @@ class ChatbotController extends Controller
             $result = match ($model) {
                 'groq'        => app(GroqService::class)->askCurevia($message, $history, 'llama-3.1-8b-instant'),
                 'groq-70b'    => app(GroqService::class)->askCurevia($message, $history, 'llama-3.3-70b-versatile'),
+                'llama4'      => app(GroqService::class)->askCurevia($message, $history, 'meta-llama/llama-4-scout-17b-16e-instruct'),
                 'gpt-oss-20b' => app(GroqService::class)->askCurevia($message, $history, 'openai/gpt-oss-20b'),
-                'deepseek'    => app(DeepSeekService::class)->askCurevia($message, $history),
                 default       => app(GeminiService::class)->askCurevia($message, $history),
             };
 

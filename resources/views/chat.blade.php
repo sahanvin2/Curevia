@@ -167,20 +167,19 @@
                         <span>Gemini</span>
                         <span class="model-badge">2.5 Flash</span>
                     </button>
-                    <button class="chat-model-btn" data-model="groq" title="Llama 3.1 8B Instant via Groq — Fast inference">
+                    <button class="chat-model-btn" data-model="groq" title="Llama 3.1 8B Instant via Groq — Fast &amp; lightweight">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
                             <polygon points="13,2 3,14 12,14 11,22 21,10 12,10" fill="currentColor"/>
                         </svg>
                         <span>Groq</span>
                         <span class="model-badge">Llama 3.1</span>
                     </button>
-                    <button class="chat-model-btn" data-model="deepseek" title="DeepSeek Chat">
+                    <button class="chat-model-btn" data-model="llama4" title="Llama 4 Scout 17Bx16E via Groq — 128k context">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-                            <circle cx="12" cy="12" r="3" fill="currentColor"/>
-                            <path d="M12 2a10 10 0 0 1 7.07 17.07M4.93 4.93A10 10 0 0 0 12 22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none" opacity="0.7"/>
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" fill="currentColor"/>
                         </svg>
-                        <span>DeepSeek</span>
-                        <span class="model-badge">Chat</span>
+                        <span>Llama 4</span>
+                        <span class="model-badge">Scout 128k</span>
                     </button>
                     <button class="chat-model-btn" data-model="groq-70b" title="Llama 3.3 70B via Groq — 128k context, highest quality">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none">

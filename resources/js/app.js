@@ -721,7 +721,7 @@ function initFullPageChat() {
         gemini:       { label: 'Gemini 2.5 Flash' },
         groq:         { label: 'Groq · Llama 3.1 8B' },
         'groq-70b':   { label: 'Groq · Llama 3.3 70B' },
-        deepseek:     { label: 'DeepSeek Chat' },
+        llama4:       { label: 'Llama 4 Scout · 128k' },
         'gpt-oss-20b':{ label: 'GPT OSS 20B · 128k' },
     };
 

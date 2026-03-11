@@ -2094,14 +2094,23 @@ footer::before {
 /* Conversation List */
 .chat-conversations {
     flex: 1;
+    min-height: 0;
     overflow-y: auto;
     padding: 0.35rem 0.5rem;
     display: flex;
     flex-direction: column;
     gap: 1px;
-    scrollbar-width: none;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.06) transparent;
 }
-.chat-conversations::-webkit-scrollbar { width: 0; }
+.chat-conversations::-webkit-scrollbar { width: 3px; }
+.chat-conversations::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.08);
+    border-radius: 3px;
+}
+.chat-conversations::-webkit-scrollbar-thumb:hover {
+    background: rgba(34,242,226,0.2);
+}
 
 .chat-conv-item {
     display: flex;
@@ -2635,15 +2644,15 @@ footer::before {
     border-color: rgba(124,108,255,0.28);
     color: var(--accent-violet);
 }
-.chat-model-btn[data-model="deepseek"].active {
-    background: rgba(59,130,246,0.07);
-    border-color: rgba(59,130,246,0.25);
-    color: #60a5fa;
-}
 .chat-model-btn[data-model="groq-70b"].active {
     background: rgba(52,211,153,0.07);
     border-color: rgba(52,211,153,0.25);
     color: #34d399;
+}
+.chat-model-btn[data-model="llama4"].active {
+    background: rgba(168,85,247,0.08);
+    border-color: rgba(168,85,247,0.28);
+    color: #c084fc;
 }
 .chat-model-btn[data-model="gpt-oss-20b"].active {
     background: rgba(251,191,36,0.07);
