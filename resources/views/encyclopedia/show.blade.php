@@ -66,13 +66,23 @@
 
         {{-- Video Embed (if article has a video) --}}
         @if($article->video_url)
+        @php
+            $mainVideoUrl = $article->video_url;
+            $isMainEmbed = str_contains($mainVideoUrl, 'youtube.com') || str_contains($mainVideoUrl, 'youtu.be') || str_contains($mainVideoUrl, 'vimeo.com');
+        @endphp
         <div style="margin-bottom:2.5rem;">
             <h4 style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent-violet);margin-bottom:0.75rem;display:flex;align-items:center;gap:0.5rem;">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor"/></svg>
                 Watch: {{ $article->title }} Explained
             </h4>
             <div style="position:relative;width:100%;padding-top:56.25%;border-radius:1rem;overflow:hidden;border:1px solid var(--border-subtle);background:#000;">
-                <iframe src="{{ $article->video_url }}?modestbranding=1&rel=0&color=white" title="{{ $article->title }} video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>
+                @if($isMainEmbed)
+                <iframe src="{{ $mainVideoUrl }}?modestbranding=1&rel=0&color=white" title="{{ $article->title }} video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>
+                @else
+                <video controls style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;">
+                    <source src="{{ $mainVideoUrl }}">
+                </video>
+                @endif
             </div>
         </div>
         @endif
@@ -124,13 +134,40 @@
                 <p>{{ $paragraphs[0] }}</p>
                 @endif
 
-                {{-- Inline image after first paragraph (use images[1..] to keep [0] as featured) --}}
-                @php $imgIndex = $idx + 1; @endphp
-                @if(isset($allImages[$imgIndex]))
+                {{-- Section images (new format) with legacy fallback to images array --}}
+                @php
+                    $sectionImages = is_array($section['images'] ?? null) ? $section['images'] : [];
+                    $imgIndex = $idx + 1;
+                @endphp
+                @if(!empty($sectionImages))
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:0.6rem;margin:1.3rem 0;">
+                    @foreach($sectionImages as $secImg)
+                    <figure style="margin:0;border-radius:0.7rem;overflow:hidden;border:1px solid var(--border-subtle);">
+                        <img src="{{ $secImg }}" alt="{{ $section['title'] }}" loading="lazy" style="width:100%;height:150px;object-fit:cover;display:block;">
+                    </figure>
+                    @endforeach
+                </div>
+                @elseif(isset($allImages[$imgIndex]))
                 <figure style="margin:1.5rem 0;border-radius:0.875rem;overflow:hidden;border:1px solid var(--border-subtle);cursor:pointer;" onclick="openLightbox({{ $imgIndex }})">
                     <img src="{{ $allImages[$imgIndex] }}" alt="{{ $section['title'] }}" loading="lazy" style="width:100%;max-height:340px;object-fit:cover;display:block;transition:transform .4s ease;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">
                     <figcaption style="padding:0.6rem 1rem;font-size:0.78rem;color:var(--text-muted);background:rgba(17,24,39,0.5);text-align:center;">{{ $section['title'] }}</figcaption>
                 </figure>
+                @endif
+
+                @php
+                    $sectionVideoUrl = $section['video_url'] ?? null;
+                    $isSectionEmbed = $sectionVideoUrl && (str_contains($sectionVideoUrl, 'youtube.com') || str_contains($sectionVideoUrl, 'youtu.be') || str_contains($sectionVideoUrl, 'vimeo.com'));
+                @endphp
+                @if($sectionVideoUrl)
+                <div style="position:relative;width:100%;padding-top:56.25%;border-radius:0.9rem;overflow:hidden;border:1px solid var(--border-subtle);background:#000;margin:1.1rem 0 1.4rem;">
+                    @if($isSectionEmbed)
+                    <iframe src="{{ $sectionVideoUrl }}" title="{{ $section['title'] }} video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>
+                    @else
+                    <video controls style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;">
+                        <source src="{{ $sectionVideoUrl }}">
+                    </video>
+                    @endif
+                </div>
                 @endif
 
                 {{-- Remaining paragraphs --}}

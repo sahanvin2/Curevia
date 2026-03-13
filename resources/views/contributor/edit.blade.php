@@ -20,7 +20,7 @@
     </div>
     @endif
 
-    <form method="POST" action="{{ $article->exists ? route('contributor.articles.update', $article) : route('contributor.articles.store') }}">
+    <form method="POST" enctype="multipart/form-data" action="{{ $article->exists ? route('contributor.articles.update', $article) : route('contributor.articles.store') }}">
         @csrf
         @if($article->exists) @method('PUT') @endif
 
@@ -36,9 +36,60 @@
                     <textarea name="summary" required rows="3" placeholder="A brief description of the article…"
                         style="width:100%;background:rgba(0,0,0,0.3);border:1px solid var(--border-subtle);border-radius:0.5rem;padding:0.75rem 1rem;color:var(--text-primary);font-size:0.875rem;outline:none;resize:vertical;box-sizing:border-box;margin-bottom:1.25rem;">{{ old('summary', $article->summary) }}</textarea>
 
-                    <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:0.3rem;font-weight:600;">Content * <span style="font-weight:400;font-size:0.75rem;">(HTML supported)</span></label>
-                    <textarea name="content" required rows="24" placeholder="Write your article content here…"
+                    <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:0.3rem;font-weight:600;">Content <span style="font-weight:400;font-size:0.75rem;">(HTML supported, or upload a document)</span></label>
+                    <textarea name="content" rows="24" placeholder="Write your article content here…"
                         style="width:100%;background:rgba(0,0,0,0.3);border:1px solid var(--border-subtle);border-radius:0.5rem;padding:0.75rem 1rem;color:var(--text-primary);font-size:0.85rem;outline:none;resize:vertical;box-sizing:border-box;line-height:1.7;">{{ old('content', $article->content) }}</textarea>
+
+                    @php
+                        $oldSectionTitles = old('section_titles');
+                        $existingSections = is_array($article->content_sections ?? null) ? $article->content_sections : [];
+                        $sectionCount = max(is_array($oldSectionTitles) ? count($oldSectionTitles) : 0, count($existingSections), 1);
+                    @endphp
+
+                    <div style="margin-top:1.25rem;padding-top:1rem;border-top:1px dashed var(--border-subtle);">
+                        <h4 style="font-size:0.85rem;color:var(--text-primary);margin:0 0 0.45rem;font-weight:700;">Section Builder</h4>
+                        <p style="font-size:0.75rem;color:var(--text-muted);margin:0 0 0.9rem;">Add section text and upload up to 5 images per section.</p>
+
+                        <div id="section-builder">
+                            @for($i = 0; $i < $sectionCount; $i++)
+                                @php
+                                    $sec = $existingSections[$i] ?? [];
+                                    $secImages = is_array($sec['images'] ?? null) ? $sec['images'] : [];
+                                @endphp
+                                <div class="section-row" style="padding:0.9rem;border:1px solid var(--border-subtle);border-radius:0.75rem;margin-bottom:0.75rem;background:rgba(255,255,255,0.01);">
+                                    <label style="display:block;font-size:0.74rem;color:var(--text-muted);margin-bottom:0.3rem;">Section Title</label>
+                                    <input type="text" name="section_titles[]" value="{{ old('section_titles.' . $i, $sec['title'] ?? '') }}"
+                                        style="width:100%;background:rgba(0,0,0,0.3);border:1px solid var(--border-subtle);border-radius:0.45rem;padding:0.55rem 0.7rem;color:var(--text-primary);font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.65rem;">
+
+                                    <label style="display:block;font-size:0.74rem;color:var(--text-muted);margin-bottom:0.3rem;">Section Body</label>
+                                    <textarea name="section_bodies[]" rows="4"
+                                        style="width:100%;background:rgba(0,0,0,0.3);border:1px solid var(--border-subtle);border-radius:0.45rem;padding:0.55rem 0.7rem;color:var(--text-primary);font-size:0.8rem;outline:none;resize:vertical;box-sizing:border-box;margin-bottom:0.65rem;">{{ old('section_bodies.' . $i, $sec['body'] ?? '') }}</textarea>
+
+                                    @if(!empty($secImages))
+                                    <div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.65rem;">
+                                        @foreach($secImages as $img)
+                                        <img src="{{ $img }}" alt="Section image" style="width:64px;height:48px;object-fit:cover;border-radius:0.3rem;border:1px solid var(--border-subtle);">
+                                        @endforeach
+                                    </div>
+                                    @endif
+
+                                    <label style="display:block;font-size:0.74rem;color:var(--text-muted);margin-bottom:0.3rem;">Section Images (max 5)</label>
+                                    <input type="file" name="section_image_files[{{ $i }}][]" multiple accept="image/*"
+                                        style="display:block;width:100%;margin-bottom:0.65rem;color:var(--text-secondary);font-size:0.78rem;">
+
+                                    <label style="display:block;font-size:0.74rem;color:var(--text-muted);margin-bottom:0.3rem;">Section Video URL</label>
+                                    <input type="url" name="section_video_urls[]" value="{{ old('section_video_urls.' . $i, $sec['video_url'] ?? '') }}" placeholder="https://..."
+                                        style="width:100%;background:rgba(0,0,0,0.3);border:1px solid var(--border-subtle);border-radius:0.45rem;padding:0.55rem 0.7rem;color:var(--text-primary);font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.65rem;">
+
+                                    <label style="display:block;font-size:0.74rem;color:var(--text-muted);margin-bottom:0.3rem;">Section Video File</label>
+                                    <input type="file" name="section_video_files[{{ $i }}]" accept="video/mp4,video/webm,video/quicktime"
+                                        style="display:block;width:100%;color:var(--text-secondary);font-size:0.78rem;">
+                                </div>
+                            @endfor
+                        </div>
+
+                        <button type="button" id="add-section-btn" style="padding:0.5rem 0.8rem;border:1px solid var(--border-subtle);background:rgba(34,242,226,0.08);border-radius:0.45rem;color:var(--accent-cyan);font-size:0.78rem;cursor:pointer;">+ Add Section</button>
+                    </div>
                 </div>
             </div>
 
@@ -60,9 +111,29 @@
                         @endforeach
                     </select>
 
+                    <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:0.3rem;">Import Document (DOCX/PDF/TXT/MD)</label>
+                    <input type="file" name="document_file" accept=".doc,.docx,.pdf,.txt,.md"
+                        style="display:block;width:100%;margin-bottom:1rem;color:var(--text-secondary);font-size:0.8rem;">
+
                     <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:0.3rem;">Featured Image URL</label>
                     <input type="url" name="featured_image" value="{{ old('featured_image', $article->featured_image) }}" placeholder="https://…"
                         style="width:100%;background:rgba(0,0,0,0.3);border:1px solid var(--border-subtle);border-radius:0.5rem;padding:0.65rem 0.875rem;color:var(--text-primary);font-size:0.875rem;outline:none;box-sizing:border-box;margin-bottom:1rem;">
+
+                    <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:0.3rem;">Featured Image File</label>
+                    <input type="file" name="featured_image_file" accept="image/*"
+                        style="display:block;width:100%;margin-bottom:1rem;color:var(--text-secondary);font-size:0.8rem;">
+
+                    <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:0.3rem;">Gallery Images</label>
+                    <input type="file" name="gallery_image_files[]" multiple accept="image/*"
+                        style="display:block;width:100%;margin-bottom:1rem;color:var(--text-secondary);font-size:0.8rem;">
+
+                    <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:0.3rem;">Main Video URL</label>
+                    <input type="url" name="video_url" value="{{ old('video_url', $article->video_url) }}" placeholder="https://..."
+                        style="width:100%;background:rgba(0,0,0,0.3);border:1px solid var(--border-subtle);border-radius:0.5rem;padding:0.65rem 0.875rem;color:var(--text-primary);font-size:0.875rem;outline:none;box-sizing:border-box;margin-bottom:1rem;">
+
+                    <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:0.3rem;">Main Video File</label>
+                    <input type="file" name="video_file" accept="video/mp4,video/webm,video/quicktime"
+                        style="display:block;width:100%;margin-bottom:1rem;color:var(--text-secondary);font-size:0.8rem;">
 
                     <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:0.3rem;">Read Time (minutes)</label>
                     <input type="number" name="read_time" value="{{ old('read_time', $article->read_time ?? 5) }}" min="1"
@@ -90,6 +161,34 @@
 
 </div>
 </section>
+
+<script>
+(function() {
+    const addBtn = document.getElementById('add-section-btn');
+    const container = document.getElementById('section-builder');
+    if (!addBtn || !container) return;
+
+    addBtn.addEventListener('click', function () {
+        const idx = container.querySelectorAll('.section-row').length;
+        const row = document.createElement('div');
+        row.className = 'section-row';
+        row.style.cssText = 'padding:0.9rem;border:1px solid var(--border-subtle);border-radius:0.75rem;margin-bottom:0.75rem;background:rgba(255,255,255,0.01);';
+        row.innerHTML = `
+            <label style="display:block;font-size:0.74rem;color:var(--text-muted);margin-bottom:0.3rem;">Section Title</label>
+            <input type="text" name="section_titles[]" style="width:100%;background:rgba(0,0,0,0.3);border:1px solid var(--border-subtle);border-radius:0.45rem;padding:0.55rem 0.7rem;color:var(--text-primary);font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.65rem;">
+            <label style="display:block;font-size:0.74rem;color:var(--text-muted);margin-bottom:0.3rem;">Section Body</label>
+            <textarea name="section_bodies[]" rows="4" style="width:100%;background:rgba(0,0,0,0.3);border:1px solid var(--border-subtle);border-radius:0.45rem;padding:0.55rem 0.7rem;color:var(--text-primary);font-size:0.8rem;outline:none;resize:vertical;box-sizing:border-box;margin-bottom:0.65rem;"></textarea>
+            <label style="display:block;font-size:0.74rem;color:var(--text-muted);margin-bottom:0.3rem;">Section Images (max 5)</label>
+            <input type="file" name="section_image_files[${idx}][]" multiple accept="image/*" style="display:block;width:100%;margin-bottom:0.65rem;color:var(--text-secondary);font-size:0.78rem;">
+            <label style="display:block;font-size:0.74rem;color:var(--text-muted);margin-bottom:0.3rem;">Section Video URL</label>
+            <input type="url" name="section_video_urls[]" placeholder="https://..." style="width:100%;background:rgba(0,0,0,0.3);border:1px solid var(--border-subtle);border-radius:0.45rem;padding:0.55rem 0.7rem;color:var(--text-primary);font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.65rem;">
+            <label style="display:block;font-size:0.74rem;color:var(--text-muted);margin-bottom:0.3rem;">Section Video File</label>
+            <input type="file" name="section_video_files[${idx}]" accept="video/mp4,video/webm,video/quicktime" style="display:block;width:100%;color:var(--text-secondary);font-size:0.78rem;">
+        `;
+        container.appendChild(row);
+    });
+})();
+</script>
 
 <style>
 @media (max-width: 900px) {
