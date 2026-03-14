@@ -257,8 +257,7 @@
                     <a href="{{ route('stories.index') }}" class="footer-link">Stories</a>
                     <a href="{{ route('discover') }}" class="footer-link">Discover</a>
                     <a href="{{ route('shop.index') }}" class="footer-link">Shop</a>
-                    <a href="#contributors" class="footer-link">Contributors</a>
-                    <a href="{{ route('advertise') }}" class="footer-link">Donors &amp; Sponsors</a>
+                    <a href="{{ route('home') }}#contributors" class="footer-link">Contributors</a>
                 </div>
 
                 {{-- Company --}}
@@ -267,7 +266,6 @@
                     <a href="{{ route('about') }}" class="footer-link">About</a>
                     <a href="{{ route('privacy') }}" class="footer-link">Privacy Policy</a>
                     <a href="{{ route('terms') }}" class="footer-link">Terms of Use</a>
-                    <a href="{{ route('advertise') }}" class="footer-link">Advertise</a>
                     <a href="{{ route('contact') }}" class="footer-link">Contact</a>
                 </div>
             </div>
@@ -369,7 +367,7 @@
             {{-- Input Area --}}
             <div class="chatbot-input-area">
                 <div class="chatbot-input-row">
-                    <textarea id="chatbot-input" class="chatbot-textarea" placeholder="Ask Curevia AI anything..." rows="1" maxlength="2000" aria-label="Type your message"></textarea>
+                    <textarea id="chatbot-input" class="chatbot-textarea" placeholder="Ask Curevia AI anything..." rows="1" maxlength="{{ auth()->check() ? 12000 : 2000 }}" aria-label="Type your message"></textarea>
                     <button id="chatbot-send" class="chatbot-send-btn" aria-label="Send message" disabled>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
@@ -446,6 +444,13 @@
     </div>
 
     <script>
+    window.CureviaChatConfig = {
+        isAuthenticated: {{ auth()->check() ? 'true' : 'false' }},
+        contextLimitChars: {{ auth()->check() ? 100000 : 2000 }},
+        loginUrl: "{{ route('login') }}",
+        registerUrl: "{{ route('register') }}"
+    };
+
     (function() {
         var COOKIE_KEY = 'curevia_cookie_consent';
         var banner = document.getElementById('cookie-banner');
