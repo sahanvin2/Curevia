@@ -17,6 +17,17 @@
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
+
+    {{-- Encyclopedia Category Pages --}}
+    @php($sitemapCategories = $categories ?? collect())
+    @foreach($sitemapCategories as $category)
+    <url>
+        <loc>{{ route('encyclopedia.index', ['category' => $category->slug]) }}</loc>
+        <lastmod>{{ optional($category->updated_at)->toAtomString() ?? now()->toAtomString() }}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    @endforeach
     <url>
         <loc>{{ url('/shop') }}</loc>
         <changefreq>daily</changefreq>

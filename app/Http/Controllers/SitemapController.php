@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Story;
 use App\Models\Product;
 use App\Models\Article;
+use App\Models\Category;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
 
@@ -30,7 +31,14 @@ class SitemapController extends Controller
                 ->orderByDesc('id')
                 ->get(['slug', 'updated_at']);
 
-            return view('sitemap', compact('stories', 'products', 'articles'))->render();
+            $categories = Category::query()
+                ->whereNotNull('slug')
+                ->where('slug', '!=', '')
+                ->orderBy('sort_order')
+                ->orderBy('name')
+                ->get(['slug', 'updated_at']);
+
+            return view('sitemap', compact('stories', 'products', 'articles', 'categories'))->render();
         });
 
         return response($xml, 200, [
