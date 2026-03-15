@@ -71,6 +71,7 @@ class EncyclopediaController extends Controller
         $article = Article::with(['category', 'author'])->where('slug', $slug)->where('status', 'published')->firstOrFail();
         $this->assignTopicImagesForListing(collect([$article]));
         $article->setAttribute('topic_gallery', $this->topicGalleryForArticle($article, 3));
+        $this->normalizeArticleMediaForDisplay($article);
         $contentSections = $this->buildDisplaySections($article);
         $comments = $article->comments()
             ->whereNull('parent_id')
@@ -139,6 +140,32 @@ class EncyclopediaController extends Controller
         }
 
         return view('encyclopedia.show', compact('article', 'related', 'relatedProducts', 'contentSections', 'comments'));
+    }
+
+    private function normalizeArticleMediaForDisplay(Article $article): void
+    {
+        $topicGallery = $this->topicGalleryForArticle($article, 3);
+        if (!empty($topicGallery)) {
+            $article->setAttribute('images', $topicGallery);
+            $article->setAttribute('topic_gallery', $topicGallery);
+        }
+
+        $sections = is_array($article->content_sections) ? $article->content_sections : [];
+        if (empty($sections)) {
+            return;
+        }
+
+        $normalizedSections = [];
+        foreach ($sections as $section) {
+            if (!is_array($section)) {
+                continue;
+            }
+
+            $section['images'] = [];
+            $normalizedSections[] = $section;
+        }
+
+        $article->setAttribute('content_sections', $normalizedSections);
     }
 
     private function assignTopicImagesForListing(Collection $articles): void
