@@ -6,9 +6,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     {{-- SEO Meta Tags --}}
-    <title>@yield('title', 'Curevia — The Ocean of Knowledge')</title>
-    <meta name="description" content="@yield('meta_description', 'Curevia is a futuristic knowledge encyclopedia covering space, science, history, geography, animals, mythology, civilizations, and natural wonders.')">
-    <meta name="keywords" content="@yield('meta_keywords', 'encyclopedia, knowledge, science, space, history, animals, geography, mythology, civilizations')">
+    <title>@yield('title', 'Curevia.app — The Ocean of Knowledge')</title>
+    <meta name="description" content="@yield('meta_description', 'Curevia.app is a futuristic knowledge encyclopedia covering space, science, history, geography, animals, mythology, civilizations, and natural wonders.')">
+    <meta name="keywords" content="@yield('meta_keywords', 'curevia.app, curevia, encyclopedia, knowledge, science, space, history, animals, geography, mythology, civilizations')">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="{{ url()->current() }}">
 
@@ -18,14 +18,14 @@
 
     {{-- Open Graph / Twitter --}}
     <meta property="og:type" content="@yield('og_type', 'website')">
-    <meta property="og:title" content="@yield('title', 'Curevia — The Ocean of Knowledge')">
-    <meta property="og:description" content="@yield('meta_description', 'Explore the universe of knowledge with Curevia.')">
+    <meta property="og:title" content="@yield('title', 'Curevia.app — The Ocean of Knowledge')">
+    <meta property="og:description" content="@yield('meta_description', 'Explore the universe of knowledge with Curevia.app.')">
     <meta property="og:image" content="@yield('og_image', asset('images/og-default.jpg'))">
     <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:site_name" content="Curevia">
+    <meta property="og:site_name" content="Curevia.app">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="@yield('title', 'Curevia — The Ocean of Knowledge')">
-    <meta name="twitter:description" content="@yield('meta_description', 'Explore the universe of knowledge with Curevia.')">
+    <meta name="twitter:title" content="@yield('title', 'Curevia.app — The Ocean of Knowledge')">
+    <meta name="twitter:description" content="@yield('meta_description', 'Explore the universe of knowledge with Curevia.app.')">
     <meta name="twitter:image" content="@yield('og_image', asset('images/og-default.jpg'))">
 
     {{-- Schema Markup --}}
@@ -43,7 +43,7 @@
     {{-- Extra head --}}
     @yield('extra_head')
 </head>
-<body class="antialiased" style="background:#0B0F14; color:#F0F4FF;">
+<body class="antialiased {{ request()->routeIs('home') ? 'page-home' : '' }}" style="background:#0B0F14; color:#F0F4FF;">
 
     {{-- Stars Background --}}
     <div id="stars-bg" class="stars-container" aria-hidden="true"></div>
@@ -119,6 +119,18 @@
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
                                 Dashboard
                             </a>
+                            @if(in_array(auth()->user()->role, ['admin', 'contributor']))
+                            <a href="{{ route('edits.author.inbox') }}" class="user-dropdown-item" role="menuitem">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+                                Author Edit Inbox
+                            </a>
+                            @endif
+                            @if(auth()->user()->role === 'admin')
+                            <a href="{{ route('admin.edit-suggestions.index') }}" class="user-dropdown-item" role="menuitem">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10"/><path d="M7 12h6"/></svg>
+                                Admin Edit Queue
+                            </a>
+                            @endif
                             <div class="user-dropdown-divider"></div>
                             <form method="POST" action="{{ route('logout') }}" style="display:block;">
                                 @csrf
@@ -147,6 +159,9 @@
         <div id="nav-search-bar" class="nav-search-slide" role="search" aria-label="Site search" aria-hidden="true">
             <div style="max-width:860px;margin:0 auto;">
                 <form action="{{ route('encyclopedia.index') }}" method="GET" style="position:relative;">
+                    @if(request()->routeIs('encyclopedia.index') && request('category'))
+                        <input type="hidden" name="category" value="{{ request('category') }}">
+                    @endif
                     <div style="position:relative;">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true" style="position:absolute;left:1.1rem;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none;z-index:1;"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
                         <input type="text" name="q" id="live-search-input" placeholder="Search topics — Space, History, Animals, Science..." class="search-bar" style="border-radius:0.75rem;padding:0.85rem 9rem 0.85rem 3rem;" autocomplete="off" aria-label="Search topics">
@@ -160,7 +175,7 @@
                 <div style="display:flex;align-items:center;gap:0.65rem;margin-top:0.65rem;flex-wrap:wrap;">
                     <span style="font-size:0.72rem;color:var(--text-muted);">Popular:</span>
                     @foreach(['Black Holes', 'Ancient Egypt', 'Human Brain', 'Milky Way', 'Amazon Rainforest'] as $hint)
-                        <a href="{{ route('encyclopedia.index', ['q' => $hint]) }}" style="font-size:0.72rem;color:var(--text-secondary);background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:100px;padding:0.2rem 0.7rem;text-decoration:none;transition:all .2s;" onmouseover="this.style.color='var(--accent-cyan)';this.style.borderColor='rgba(34,242,226,0.3)'" onmouseout="this.style.color='var(--text-secondary)';this.style.borderColor='rgba(255,255,255,0.07)'">{{ $hint }}</a>
+                        <a href="{{ route('encyclopedia.index', array_filter(['q' => $hint, 'category' => request()->routeIs('encyclopedia.index') ? request('category') : null])) }}" style="font-size:0.72rem;color:var(--text-secondary);background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:100px;padding:0.2rem 0.7rem;text-decoration:none;transition:all .2s;" onmouseover="this.style.color='var(--accent-cyan)';this.style.borderColor='rgba(34,242,226,0.3)'" onmouseout="this.style.color='var(--text-secondary)';this.style.borderColor='rgba(255,255,255,0.07)'">{{ $hint }}</a>
                     @endforeach
                 </div>
             </div>
@@ -187,6 +202,14 @@
         <a href="{{ route('discover') }}" class="mobile-nav-link" onclick="toggleMobileMenu()">Discover</a>
         <a href="{{ route('shop.index') }}" class="mobile-nav-link" onclick="toggleMobileMenu()">Shop</a>
         <a href="{{ route('chat') }}" class="mobile-nav-link" onclick="toggleMobileMenu()">AI Chat</a>
+        @auth
+            @if(in_array(auth()->user()->role, ['admin', 'contributor']))
+                <a href="{{ route('edits.author.inbox') }}" class="mobile-nav-link" onclick="toggleMobileMenu()">Author Edit Inbox</a>
+            @endif
+            @if(auth()->user()->role === 'admin')
+                <a href="{{ route('admin.edit-suggestions.index') }}" class="mobile-nav-link" onclick="toggleMobileMenu()">Admin Edit Queue</a>
+            @endif
+        @endauth
 
         @auth
             <div style="display:flex;flex-direction:column;align-items:center;gap:0.75rem;margin-top:1.75rem;width:100%;max-width:240px;">
@@ -257,7 +280,7 @@
                     <a href="{{ route('stories.index') }}" class="footer-link">Stories</a>
                     <a href="{{ route('discover') }}" class="footer-link">Discover</a>
                     <a href="{{ route('shop.index') }}" class="footer-link">Shop</a>
-                    <a href="{{ route('home') }}#contributors" class="footer-link">Contributors</a>
+                    <a href="{{ route('contributors.index') }}" class="footer-link">Contributors</a>
                 </div>
 
                 {{-- Company --}}
@@ -443,29 +466,61 @@
         </div>
     </div>
 
+    <div
+        id="curevia-chat-config"
+        hidden
+        data-is-authenticated="{{ auth()->check() ? '1' : '0' }}"
+        data-context-limit-chars="{{ auth()->check() ? 100000 : 2000 }}"
+        data-login-url="{{ route('login') }}"
+        data-register-url="{{ route('register') }}"
+        data-cookie-consent-url="{{ route('api.cookie-consent') }}"
+    ></div>
+
     <script>
-    window.CureviaChatConfig = {
-        isAuthenticated: {{ auth()->check() ? 'true' : 'false' }},
-        contextLimitChars: {{ auth()->check() ? 100000 : 2000 }},
-        loginUrl: "{{ route('login') }}",
-        registerUrl: "{{ route('register') }}"
-    };
+    (function() {
+        var configEl = document.getElementById('curevia-chat-config');
+        var fallbackConfig = {
+            isAuthenticated: false,
+            contextLimitChars: 2000,
+            loginUrl: '/login',
+            registerUrl: '/register'
+        };
+
+        if (!configEl) {
+            window.CureviaChatConfig = fallbackConfig;
+            return;
+        }
+
+        var limitValue = parseInt(configEl.getAttribute('data-context-limit-chars') || '', 10);
+        window.CureviaChatConfig = {
+            isAuthenticated: configEl.getAttribute('data-is-authenticated') === '1',
+            contextLimitChars: Number.isFinite(limitValue) ? limitValue : fallbackConfig.contextLimitChars,
+            loginUrl: configEl.getAttribute('data-login-url') || fallbackConfig.loginUrl,
+            registerUrl: configEl.getAttribute('data-register-url') || fallbackConfig.registerUrl
+        };
+    })();
 
     (function() {
         var COOKIE_KEY = 'curevia_cookie_consent';
         var banner = document.getElementById('cookie-banner');
+        var configEl = document.getElementById('curevia-chat-config');
 
         function cookieConsent(choice) {
             try { localStorage.setItem(COOKIE_KEY, choice + ':' + Date.now()); } catch(e){}
             // Store consent securely on the server
-            fetch('{{ route("api.cookie-consent") }}', {
+            var consentUrl = (window.CureviaChatConfig && configEl)
+                ? (configEl.getAttribute('data-cookie-consent-url') || '')
+                : '';
+            if (consentUrl) {
+                fetch(consentUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 },
                 body: JSON.stringify({ consent: choice })
-            }).catch(function(){});
+                }).catch(function(){});
+            }
             banner.classList.remove('visible');
             setTimeout(function(){ banner.style.display = 'none'; }, 500);
         }

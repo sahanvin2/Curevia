@@ -93,9 +93,9 @@
             <div style="background:rgba(17,24,39,0.7);border:1px solid var(--border-subtle);border-radius:1.25rem;padding:1.5rem;">
                 <h3 style="font-size:0.85rem;font-weight:800;color:var(--text-primary);text-transform:uppercase;letter-spacing:.07em;margin-bottom:1.25rem;">Direct Contact</h3>
                 @foreach([
-                    ['M','General','hello@curevia.com','mailto:hello@curevia.com'],
-                    ['M','Editorial','editorial@curevia.com','mailto:editorial@curevia.com'],
-                    ['M','Advertising','ads@curevia.com','mailto:ads@curevia.com'],
+                    ['M','General','hello@curevia.app','mailto:hello@curevia.app'],
+                    ['M','Editorial','editorial@curevia.app','mailto:editorial@curevia.app'],
+                    ['M','Advertising','ads@curevia.app','mailto:ads@curevia.app'],
                 ] as [$icon,$label,$val,$href])
                 <div style="display:flex;align-items:flex-start;gap:0.75rem;padding:0.6rem 0;{{ !$loop->last ? 'border-bottom:1px solid var(--border-subtle);' : '' }}">
                     <div style="width:30px;height:30px;border-radius:8px;background:rgba(34,242,226,0.07);display:flex;align-items:center;justify-content:center;flex-shrink:0;">

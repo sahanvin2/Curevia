@@ -30,7 +30,7 @@
         ['Termination', 'We reserve the right to terminate or suspend your account at our discretion, with or without notice, for violation of these Terms. Upon termination, your right to use the service ceases immediately.'],
         ['Changes to Terms', 'We may update these Terms periodically. Material changes will be communicated via email to registered users. Continued use of Curevia after changes constitutes acceptance of the revised Terms.'],
         ['Governing Law', 'These Terms are governed by applicable law. Any disputes shall be resolved through good-faith negotiation before pursuing legal remedies.'],
-        ['Contact', 'For questions about these Terms, contact us at legal@curevia.com or through our Contact page.'],
+        ['Contact', 'For questions about these Terms, contact us at legal@curevia.app or through our Contact page.'],
     ]; @endphp
 
     @foreach($sections as $idx => [$title, $body])

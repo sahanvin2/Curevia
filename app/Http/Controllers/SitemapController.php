@@ -13,7 +13,7 @@ class SitemapController extends Controller
 {
     public function index(): Response
     {
-        $xml = Cache::remember('sitemap.xml.v2', now()->addMinutes(5), function () {
+        $xml = Cache::remember('sitemap.xml.v3', now()->addMinutes(5), function () {
             $stories = Story::where('status', 'published')
                 ->orderByDesc('updated_at')
                 ->orderByDesc('id')
