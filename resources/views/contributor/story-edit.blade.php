@@ -163,6 +163,7 @@
                         style="display:block;width:100%;margin-bottom:1rem;color:var(--text-secondary);font-size:0.8rem;">
 
                     <div style="margin-bottom:1rem;">
+                        <input type="hidden" name="gallery_state_submitted" value="1">
                         <div style="display:flex;align-items:center;justify-content:space-between;gap:0.75rem;margin-bottom:0.45rem;">
                             <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin:0;">Gallery Images</label>
                             <span style="font-size:0.72rem;color:var(--text-muted);">Drag to reorder</span>
