@@ -201,7 +201,22 @@ class ImportYoutubeEmbedsCommand extends Command
             ->orderByRaw('CASE WHEN slug = ? THEN 0 WHEN LOWER(title) = ? THEN 1 ELSE 2 END', [$topicSlug, $normalizedTitle])
             ->first();
 
-        return $article;
+        if ($article) {
+            return $article;
+        }
+
+        /** @var Article|null $crossCategory */
+        $crossCategory = Article::query()
+            ->where(function ($q) use ($topicSlug, $normalizedTitle) {
+                $q->where('slug', $topicSlug)
+                    ->orWhereRaw('LOWER(title) = ?', [$normalizedTitle])
+                    ->orWhere('slug', 'like', '%' . $topicSlug . '%')
+                    ->orWhereRaw('LOWER(title) LIKE ?', ['%' . $normalizedTitle . '%']);
+            })
+            ->orderByRaw('CASE WHEN slug = ? THEN 0 WHEN LOWER(title) = ? THEN 1 ELSE 2 END', [$topicSlug, $normalizedTitle])
+            ->first();
+
+        return $crossCategory;
     }
 
     private function normalizeTopicSlug(string $topicSlug): string
